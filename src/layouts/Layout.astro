@@ -1,23 +1,72 @@
+---
+import "../styles/global.css";
+import Header2Block from "@/components/blocks/header-2.astro";
+import { ThemeProvider } from "@/components/ui/theme-toggle";
+import Footer3Block from "@/components/blocks/footer-3.astro";
+---
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <ThemeProvider />
+    <title>Astro Basics</title>
+  </head>
+  <body>
+    <Header2Block
+      logo={{
+        label: "Lingua Forte",
+        href: "/",
+      }}
+      navigation={[
+        { label: "About", href: "#" },
+        { label: "Programs", href: "#" },
+        { label: "How it works", href: "#" },
+      ]}
+      buttons={[{ label: "Get started", href: "#", variant: "default" }]}
+    />
+    <slot />
+    <Footer3Block
+      brandName="Lingua Forte"
+      brandHref="/"
+      description="Beautiful Astro components built with Tailwind CSS. Open source and ready to copy into your projects."
+      socials={[
+        {
+          label: "GitHub",
+          href: "https://github.com/fulldotdev/ui",
+          icon: "github",
+        },
+        { label: "Discord", href: "https://discord.gg/", icon: "discord" },
+        { label: "X", href: "https://x.com/", icon: "x" },
+      ]}
+      columns={[
+        {
+          title: "Resources",
+          links: [
+            { label: "Documentation", href: "/docs/" },
+            { label: "Guides", href: "/docs/" },
+            { label: "Examples", href: "/blocks/" },
+          ],
+        },
+        {
+          title: "Company",
+          links: [
+            { label: "About", href: "/" },
+            { label: "Contact", href: "/blocks/contact/" },
+            { label: "GitHub", href: "https://github.com/fulldotdev/ui" },
+          ],
+        },
+      ]}
+      copyright="© 2026 fulldev/ui"
+      bottomLinks={[
+        { label: "Privacy", href: "/" },
+        { label: "Terms", href: "/" },
+        { label: "Sitemap", href: "/" },
+      ]}
+    />
+  </body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

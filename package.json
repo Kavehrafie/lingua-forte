@@ -16,10 +16,22 @@
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.6.1",
-		"astro": "^6.4.4"
+		"@data-slot/accordion": "^0.2.166",
+		"@data-slot/dialog": "^0.2.166",
+		"@data-slot/navigation-menu": "^0.2.166",
+		"@tailwindcss/vite": "^4.3.0",
+		"astro": "^6.4.4",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"lucide-static": "^1.17.0",
+		"simple-icons": "^16.23.0",
+		"tailwind-merge": "^3.6.0",
+		"tailwindcss": "^4.3.0"
 	},
 	"devDependencies": {
+		"@astrojs/check": "^0.9.9",
 		"@types/node": "^25.9.2",
+		"typescript": "^6.0.3",
 		"wrangler": "^4.98.0"
 	},
 	"overrides": {

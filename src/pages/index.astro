@@ -1,11 +1,114 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Welcome from "../components/Welcome.astro";
+import Layout from "../layouts/Layout.astro";
+import Faqs4Block from "@/components/blocks/faqs-4.astro";
+import Contact2Block from "@/components/blocks/contact-1.astro";
+import Hero5Block from "@/components/blocks/hero-5.astro";
+import placeholderImage from "@/assets/naassom-azevedo-Q_Sei-TqSlc-unsplash.jpg";
+import Steps from "@/components/blocks/steps.astro";
+import Hero8Block from "@/components/blocks/hero-8.astro";
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Welcome />
+  <Hero8Block
+    title="Speak with <em class='text-primary'>confidence</em>. Live without limits."
+    description="Lingua Forte offers warm, immersive English courses for every level — from first words to fluent conversations. <span class='underline'>Real teachers</span>! <span class='underline'>Real progress</span>!"
+    buttons={[
+      { label: "Get started", href: "/docs/", variant: "default" },
+      // { label: "Learn more", href: "#", variant: "secondary" },
+    ]}
+    image={{ src: placeholderImage, alt: "App screenshot" }}
+  />
+
+  <!-- <Hero5Block
+    title="Speak with <em class='text-primary'>confidence</em>. Live without limits."
+    description="A split hero with a feature checklist, action buttons, and social proof on the left — and a product image on the right."
+    features={[
+      "Zero-JS components by default",
+      "shadcn-compatible installation",
+      "Astro-first primitives",
+      "Fully accessible and keyboard-navigable",
+    ]}
+    buttons={[
+      { label: "Get started", href: "/docs/", variant: "default" },
+      { label: "Components", href: "/components/", variant: "secondary" },
+    ]}
+    ,
+    image={{ src: placeholderImage, alt: "Product screenshot" }}
+  /> -->
+  <Contact2Block
+    title="Let's work together"
+    description="Tell us about the site, timeline, and what kind of help you need."
+    contactItems={[
+      {
+        icon: "mail",
+        title: "Email",
+        description: "contact@full.dev",
+        href: "mailto:contact@full.dev",
+      },
+      {
+        icon: "phone",
+        title: "Phone",
+        description: "+31 6 83485163",
+        href: "tel:+31683485163",
+      },
+      {
+        icon: "map-pin",
+        title: "Office",
+        description: "Vismarkt 5a, 9712 CA Groningen",
+        href: "https://maps.google.com/?q=Vismarkt%205a%2C%209712%20CA%20Groningen",
+      },
+      {
+        icon: "clock",
+        title: "Hours",
+        description: "Weekdays, 9 am to 6 pm CET",
+        href: "#",
+      },
+    ]}
+    form={{
+      title: "Send us a message",
+      legend: "Contact form",
+      nameLabel: "Name",
+      namePlaceholder: "Jordan Lee",
+      emailLabel: "Email",
+      emailPlaceholder: "jordan@northwind.studio",
+      messageLabel: "Message",
+      messagePlaceholder:
+        "We are refreshing our docs and need reusable sections for onboarding, changelogs, and feature launches.",
+      actionLabel: "Send message",
+    }}
+  />
+  <Steps />
+  <Faqs4Block
+    title="Frequently asked questions"
+    faqs={[
+      {
+        id: "faq-4-1",
+        question: "Is my data secure on your platform?",
+        answer:
+          "Absolutely. We use end-to-end encryption, SOC 2 Type II compliance, and regular third-party security audits to keep your data safe.",
+      },
+      {
+        id: "faq-4-2",
+        question: "Can I export my data if I leave?",
+        answer:
+          "Yes. You can export all of your data at any time in standard formats like CSV and JSON. There is no lock-in.",
+      },
+      {
+        id: "faq-4-3",
+        question: "Do you offer an uptime SLA?",
+        answer:
+          "Paid plans include a 99.9% uptime SLA. Enterprise plans can negotiate higher guarantees with dedicated support.",
+      },
+      {
+        id: "faq-4-4",
+        question: "How often do you release new features?",
+        answer:
+          "We ship updates weekly and publish a detailed changelog so you always know what is new.",
+      },
+    ]}
+  />
 </Layout>
