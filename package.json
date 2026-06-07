@@ -1,0 +1,28 @@
+{
+	"name": "lingua-forte",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro build && wrangler pages dev",
+		"astro": "astro",
+		"generate-types": "wrangler types",
+		"deploy": "astro build && wrangler pages deploy",
+		"cf-typegen": "wrangler types"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^13.6.1",
+		"astro": "^6.4.4"
+	},
+	"devDependencies": {
+		"@types/node": "^25.9.2",
+		"wrangler": "^4.98.0"
+	},
+	"overrides": {
+		"vite": "^7"
+	}
+}
