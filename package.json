@@ -19,6 +19,8 @@
 		"@data-slot/accordion": "^0.2.166",
 		"@data-slot/dialog": "^0.2.166",
 		"@data-slot/navigation-menu": "^0.2.166",
+		"@fontsource-variable/inter-tight": "^5.2.7",
+		"@fontsource-variable/newsreader": "^5.2.10",
 		"@tailwindcss/vite": "^4.3.0",
 		"astro": "^6.4.4",
 		"better-auth": "^1.6.20",
