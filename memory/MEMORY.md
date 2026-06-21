@@ -1,3 +1,4 @@
 - [Lingua Forte business facts](project_business_facts.md) — contact email, Montreal office, EDT hours, dialog-based teaching philosophy, 3-step intake, FAQ topics
 - [Lingua Forte site scope](project_scope.md) — `/signup` is the primary conversion surface; landing page funnels to it
 - [Landing page funnels to /signup](feedback_landing_funnel.md) — never embed the full form inline on the landing page; CTAs only
+- [Design color & rhythm](project_design_rhythm.md) — one full-bleed forest section (Steps), wordmark in primary, lean on brand color not neutrals

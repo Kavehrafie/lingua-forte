@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 type Props = HTMLAttributes<"header"> & VariantProps<typeof variants>;
 
-const variants = cva("relative z-50 flex w-full items-center gap-4 py-2", {
+const variants = cva("sticky top-0 z-50 flex w-full items-center gap-4 py-2", {
   variants: {
     variant: {
       default: "",

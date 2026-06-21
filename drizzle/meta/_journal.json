@@ -8,6 +8,13 @@
       "when": 1782024326744,
       "tag": "0000_calm_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1782034508992,
+      "tag": "0001_solid_spirit",
+      "breakpoints": true
     }
   ]
 }

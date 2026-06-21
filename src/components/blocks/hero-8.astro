@@ -4,6 +4,7 @@ import { Image } from "astro:assets";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Section, SectionContainer } from "@/components/ui/section";
 
 type Props = {
@@ -22,48 +23,70 @@ type Props = {
 };
 
 const { class: className, title, description, buttons, image } = Astro.props;
+
+// Image-forward hero: one large feature image dominates, with the headline,
+// lede, CTA, and the "Taught by real teachers" reassurance living together in
+// a single bone card anchored to the image's lower-left. Keeps the composition
+// balanced (the image carries the weight; the card carries the message) instead
+// of a tall text column beside a short image. Mobile: card spans the bottom;
+// sm+: it becomes a sized card offset to the left.
 ---
 
 <Section class={cn("", className)}>
-  <SectionContainer
-    class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-0"
-  >
-    <div class="flex flex-col gap-6 lg:pr-12">
-      <div class="flex flex-col gap-4">
+  <SectionContainer>
+    <div class="relative">
+      <Image
+        src={image.src}
+        alt={image.alt}
+        class="aspect-4/3 w-full rounded-2xl border object-cover shadow-[0_30px_80px_-30px_rgba(31,77,58,0.45)] sm:aspect-[16/10]"
+        widths={[640, 960, 1280, 1920]}
+        sizes="100vw"
+        loading="eager"
+      />
+      <div
+        class="absolute inset-x-4 bottom-4 rounded-2xl border bg-background/95 p-6 shadow-[0_24px_60px_-24px_rgba(31,77,58,0.5)] backdrop-blur-sm sm:inset-x-auto sm:bottom-8 sm:left-8 sm:max-w-lg sm:p-8"
+      >
         <h1
-          class="text-foreground font-display text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl"
+          class="text-foreground font-display text-3xl leading-[1.12] font-semibold tracking-tight text-balance sm:text-4xl"
           set:html={title}
         />
-        <div
-          class="text-muted-foreground text-lg leading-relaxed"
+        <p
+          class="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base"
           set:html={description}
         />
-      </div>
-      <div class="flex flex-wrap gap-3">
-        {
-          buttons.map(({ href, label, ...button }, index) => (
-            <Button
-              as="a"
-              href={href}
-              size="lg"
-              variant={
-                button.variant ?? (index === 0 ? "default" : "secondary")
-              }
-              {...button}
-            >
-              {label}
-            </Button>
-          ))
-        }
+        <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+          {
+            buttons.map(({ href, label, ...button }, index) => (
+              <Button
+                as="a"
+                href={href}
+                size="xl"
+                variant={
+                  button.variant ?? (index === 0 ? "default" : "secondary")
+                }
+                class={
+                  index === 0
+                    ? "shadow-[0_12px_30px_-10px_rgba(31,77,58,0.55)]"
+                    : undefined
+                }
+                {...button}
+              >
+                {label}
+                {index === 0 && (
+                  <Icon
+                    name="arrow-right"
+                    class="transition-transform duration-200 group-hover/button:translate-x-0.5"
+                  />
+                )}
+              </Button>
+            ))
+          }
+          <span class="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Icon name="badge-check" class="size-4 text-accent" />
+            Taught by real teachers
+          </span>
+        </div>
       </div>
     </div>
-    <Image
-      src={image.src}
-      alt={image.alt}
-      class="aspect-4/3 w-full rounded-xl border object-cover"
-      widths={[640, 960, 1280]}
-      sizes="(min-width: 1024px) 75vw, 100vw"
-      loading="eager"
-    />
   </SectionContainer>
 </Section>

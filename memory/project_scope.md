@@ -4,7 +4,7 @@ description: In-flight scope decisions for the Lingua Forte redesign beyond the 
 type: project
 ---
 
-**Separate signup page is in scope** (added 2026-06-21). `src/pages/signup.astro` is the primary conversion surface and hosts the full multi-field form.
+**The `/signup` page is designed by the USER themselves** (confirmed 2026-06-21). The agent does NOT build `src/pages/signup.astro`. The user owns its design. Landing-page CTAs still target `/signup` (the agreed route).
 
 **Landing page funnels to `/signup`; it does NOT embed the full form inline.** Landing page job is to help and entice the visitor to click through to `/signup`. Every CTA on the landing page (hero button, header button, about block, final CTA block) links to `/signup`. The landing page may have a single CTA-style "signup" block with `id="signup"` for in-page anchor scrolling, but no form fields.
 

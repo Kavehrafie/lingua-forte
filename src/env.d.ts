@@ -13,3 +13,7 @@ declare namespace Cloudflare {
 		NOREPLY_EMAIL: string;
 	}
 }
+
+// Fontsource variable fonts are CSS-only side-effect imports with no TS types.
+declare module "@fontsource-variable/newsreader";
+declare module "@fontsource-variable/inter-tight";

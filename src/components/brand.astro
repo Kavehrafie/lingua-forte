@@ -4,7 +4,11 @@
 // "Forte" (Latin: strength, expertise) in the display serif, italic.
 // The sans/serif + upright/italic split is the brand signature,
 // echoed by the italic emphasis words used across the site.
+// Color split carries the brand: "Lingua" in primary forest (sage in dark
+// mode for contrast), "Forte" in the amber accent. Both weighted semibold so
+// the serif italic reads as a peer to the sans, not fragile beside it. As a
+// logotype the wordmark is exempt from WCAG text-contrast, so amber is fine.
 ---
-<span class="font-sans font-semibold tracking-tight text-foreground">
-  Lingua <span class="font-display italic">Forte</span>
+<span class="font-sans font-semibold tracking-tight text-primary dark:text-[#6FB389]">
+  Lingua <span class="font-display font-semibold italic text-accent">Forte</span>
 </span>

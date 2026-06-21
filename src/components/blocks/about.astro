@@ -1,0 +1,64 @@
+---
+import { Image } from "astro:assets";
+
+import { Icon } from "@/components/ui/icon";
+import { Section, SectionContainer } from "@/components/ui/section";
+import aboutImage from "@/assets/joel-frank-Nwo3kck3zMI-unsplash.jpg";
+
+// About / philosophy block. Editorial two-column on bone: portrait image LEFT,
+// copy RIGHT. Flipped from the hero (text-left/image-right) so the two don't
+// repeat the same split. Carries the real "dialogue-based learning" identity.
+// Surface stays bone; the Steps section owns the forest interlude. Mobile keeps
+// copy first (text leads), image second, via order utilities.
+---
+
+<Section id="about">
+  <SectionContainer
+    class="grid gap-12 lg:grid-cols-[6fr_5fr] lg:items-center lg:gap-16"
+  >
+    <div class="flex flex-col gap-6 lg:order-2">
+      <h2
+        class="font-display text-foreground text-3xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-4xl"
+      >
+        English classes built on real <em class="text-accent italic"
+          >conversation</em
+        >.
+      </h2>
+      <div
+        class="flex max-w-prose flex-col gap-4 text-lg leading-relaxed text-muted-foreground"
+      >
+        <p>
+          Lingua Forte is a new school with a simple belief: people learn a
+          language by using it. Our teachers bring years of experience across
+          every level, and every class is built around hours of gentle, rich,
+          informative conversation.
+        </p>
+        <p>
+          One personalized course prepares you for any exam and for the everyday
+          and professional moments that follow. No generic cram sessions. No
+          rigid tracks.
+        </p>
+      </div>
+      <a
+        href="/signup"
+        class="group mt-2 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-accent"
+      >
+        Start with a free placement session
+        <Icon
+          name="arrow-right"
+          class="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
+        />
+      </a>
+    </div>
+    <div class="lg:order-1">
+      <Image
+        src={aboutImage}
+        alt="A teacher and student in an English conversation class"
+        class="aspect-4/5 w-full rounded-2xl border object-cover shadow-[0_24px_60px_-24px_rgba(31,77,58,0.4)]"
+        widths={[480, 720, 960]}
+        sizes="(min-width: 1024px) 45vw, 100vw"
+        loading="lazy"
+      />
+    </div>
+  </SectionContainer>
+</Section>

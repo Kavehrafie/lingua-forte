@@ -1,10 +1,14 @@
 ---
 import { Section, SectionContainer } from "@/components/ui/section";
+
 type Step = {
   title: string;
   description: string;
 };
 
+// "Three Steps to Fluency" intake flow. Vertical numbered list on every
+// breakpoint (mobile-first), so the layout never collapses badly. The large
+// display-serif numerals carry the visual rhythm; no connector lines.
 const steps: Step[] = [
   {
     title: "Book a placement session",
@@ -24,32 +28,35 @@ const steps: Step[] = [
 ];
 ---
 
-<Section id="how-it-works">
-  <SectionContainer class="py-24 gap-24">
-    <h2
-      class="text-foreground text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
-    >
-      Three Steps to Fluency
-    </h2>
-    <div class="flex flex-row justify-between gap-0">
-      {
-        steps.map((step, index) => (
-          <div class="flex flex-1 items-start gap-4">
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-              {index + 1}
-            </div>
-            <div class="flex-1">
-              <div class="flex gap-2">
-                <h3 class="text-lg font-semibold min-w-45">{step.title}</h3>
-                {index < steps.length - 1 && (
-                  <span class="bg-primary h-1 w-full mt-[14px] -mr-1" />
-                )}
+<Section id="how-it-works" class="bg-primary">
+  <SectionContainer class="items-center">
+    <div class="w-full max-w-3xl">
+      <h2
+        class="font-display text-primary-foreground text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl"
+      >
+        Three Steps to Fluency
+      </h2>
+      <ol class="mt-10 flex flex-col sm:mt-14">
+        {
+          steps.map((step, index) => (
+            <li
+              class="flex gap-6 border-t border-white/15 py-6 first:border-t-0 first:pt-0 sm:gap-8 sm:py-8"
+            >
+              <div class="font-display text-accent text-5xl leading-none font-semibold tabular-nums sm:text-6xl">
+                {index + 1}
               </div>
-              <p class="text-muted-foreground">{step.description}</p>
-            </div>
-          </div>
-        ))
-      }
+              <div class="flex flex-col gap-2 pt-1.5 sm:pt-2">
+                <h3 class="text-xl font-semibold text-primary-foreground sm:text-2xl">
+                  {step.title}
+                </h3>
+                <p class="text-primary-foreground/75 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
     </div>
   </SectionContainer>
 </Section>

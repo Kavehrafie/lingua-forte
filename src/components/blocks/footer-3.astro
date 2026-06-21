@@ -21,6 +21,7 @@ type Props = {
     links: {
       label: string
       href: string
+      icon?: string
     }[]
   }[]
   copyright: string
@@ -83,9 +84,12 @@ const {
                     <li>
                       <a
                         href={link.href}
-                        class="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                        class="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm transition-colors"
                       >
-                        {link.label}
+                        {link.icon && (
+                          <Icon name={link.icon} class="size-4 shrink-0" />
+                        )}
+                        <span>{link.label}</span>
                       </a>
                     </li>
                   ))}
