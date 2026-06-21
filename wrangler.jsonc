@@ -5,41 +5,57 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "lingua-forte",
+	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2026-06-07",
 	"compatibility_flags": [
-		"nodejs_compat"
+		"nodejs_compat",
+		"nodejs_als"
 	],
-
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
 	"upload_source_maps": true,
 	/**
-	 * Smart Placement
-	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
+   * Smart Placement
+   * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+   */
 	// "placement": {  "mode": "smart" }
 	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
+   * Bindings
+   * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+   * databases, object storage, AI inference, real-time communication and more.
+   * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+   */
 	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
+   * Environment Variables
+   * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+   * Note: Use secrets to store sensitive data.
+   * https://developers.cloudflare.com/workers/configuration/secrets/
+   */
 	// "vars": {  "MY_VARIABLE": "production_value" }
 	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	"assets": {  "directory": "./dist/client/" }
+   * Static Assets
+   * https://developers.cloudflare.com/workers/static-assets/binding/
+   */
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare",
+	},
 	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
+   * Service Bindings (communicate between multiple Workers)
+   * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
+   */
 	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+	"send_email": [
+		{
+			"name": "EMAIL",
+		},
+	],
+	"d1_databases": [
+		{
+			"binding": "db",
+			"database_name": "lingua-forte-db",
+			"database_id": "55f2e8df-93e1-4f0b-a879-d435e07455bf"
+		}
+	],
 }
