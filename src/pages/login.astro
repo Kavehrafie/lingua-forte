@@ -1,0 +1,62 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+const session = Astro.locals.session;
+if (session) {
+  return Astro.redirect("/admin");
+}
+---
+
+<Layout>
+  <section class="mx-auto flex max-w-lg flex-col items-center gap-8 px-4 py-24">
+    <div class="text-center">
+      <h1 class="text-3xl font-semibold tracking-tight">Sign in</h1>
+      <p class="mt-2 text-muted-foreground">
+        Click below and we&rsquo;ll send a magic link to your email.
+      </p>
+    </div>
+
+    <form id="login-form" class="w-full space-y-4">
+
+
+      <button
+        type="submit"
+        id="submit-btn"
+        class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+      >
+        Send magic link
+      </button>
+    </form>
+
+    <p id="message" class="text-sm text-muted-foreground hidden"></p>
+  </section>
+</Layout>
+
+<script>
+  import { actions } from "astro:actions";
+
+  const form = document.getElementById("login-form") as HTMLFormElement;
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+  const message = document.getElementById("message") as HTMLParagraphElement;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    message.classList.add("hidden");
+
+    const { data, error } = await actions.sendMagicLink();
+
+    submitBtn.disabled = false;
+
+    if (error) {
+      message.textContent = error.message || "Something went wrong. Please try again.";
+      message.classList.add("text-destructive");
+      message.classList.remove("hidden", "text-muted-foreground");
+    } else {
+      message.textContent = "Check your email! We sent you a magic link.";
+      message.classList.remove("text-destructive");
+      message.classList.add("text-muted-foreground");
+      message.classList.remove("hidden");
+    }
+  });
+</script>
