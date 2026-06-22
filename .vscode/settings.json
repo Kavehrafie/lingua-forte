@@ -1,5 +1,14 @@
 {
-	"files.associations": {
-		"wrangler.json": "jsonc"
-	}
+  "files.associations": {
+    "wrangler.json": "jsonc"
+  },
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:lingua-forte}/.wrangler/state/v3/d1/miniflare-D1DatabaseObject/5f1ed76a7bc969288b79151fd46ee8d78b1fdc0c19c42c7a7e98ca0a3db69753.sqlite",
+      "name": "d1"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
 }

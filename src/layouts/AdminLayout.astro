@@ -1,0 +1,86 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import { Icon } from "@/components/ui/icon";
+import type { User } from "better-auth";
+import { Button } from "@/components/ui/button";
+
+interface Props {
+  user: User;
+}
+
+const { user }: Props = Astro.props;
+---
+
+<Layout showPublicHeader={false} showPublicFooter={false}>
+  <SidebarProvider>
+    <Sidebar collapsible="icon">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="/" isActive>
+                  <Icon name="house" />
+                  <span>Home</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="#">
+                  <Icon name="layout-dashboard" />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton href="#">
+                  <Icon name="settings" />
+                  <span>Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <p class="mt-2 text-muted-foreground">
+          You are signed in as <span class="font-medium">{user.email}</span>.
+        </p>
+        <Button variant="outline" id="sign-out-btn"> Sign out </Button>
+      </SidebarFooter>
+    </Sidebar>
+    <SidebarInset>
+      <header class="flex h-14 items-center gap-2 border-b px-6">
+        <SidebarTrigger />
+        <span class="text-sm font-medium">Workspace</span>
+      </header>
+      <main class="flex-1 p-4">
+        <slot />
+      </main>
+    </SidebarInset>
+  </SidebarProvider>
+</Layout>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+
+  document
+    .getElementById("sign-out-btn")
+    ?.addEventListener("click", async () => {
+      await authClient.signOut();
+      window.location.href = "/";
+    });
+</script>

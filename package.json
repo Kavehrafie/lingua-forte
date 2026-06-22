@@ -19,33 +19,37 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^13.6.1",
+		"@astrojs/cloudflare": "^13.7.0",
 		"@data-slot/accordion": "^0.2.166",
 		"@data-slot/dialog": "^0.2.166",
+		"@data-slot/dropdown-menu": "^0.2.166",
 		"@data-slot/navigation-menu": "^0.2.166",
+		"@data-slot/select": "^0.2.166",
 		"@data-slot/tabs": "^0.2.166",
+		"@data-slot/tooltip": "^0.2.166",
 		"@fontsource-variable/inter-tight": "^5.2.7",
 		"@fontsource-variable/newsreader": "^5.2.10",
-		"@tailwindcss/vite": "^4.3.0",
-		"astro": "^6.4.4",
+		"@lexingtonthemes/seo": "^0.4.0",
+		"@tailwindcss/vite": "^4.3.1",
+		"astro": "^6.4.8",
 		"better-auth": "^1.6.20",
 		"better-auth-cloudflare-email": "^0.2.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"drizzle-orm": "^0.45.2",
-		"lucide-static": "^1.17.0",
-		"simple-icons": "^16.23.0",
+		"lucide-static": "^1.21.0",
+		"simple-icons": "^16.24.0",
 		"tailwind-merge": "^3.6.0",
-		"tailwindcss": "^4.3.0"
+		"tailwindcss": "^4.3.1"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.9",
-		"@types/node": "^25.9.2",
+		"@types/node": "^25.9.4",
 		"drizzle-kit": "^0.31.10",
 		"shadcn": "^4.11.0",
 		"tsx": "^4.22.4",
 		"typescript": "^6.0.3",
-		"vite": "^7",
-		"wrangler": "^4.98.0"
+		"vite": "^7.3.5",
+		"wrangler": "^4.103.0"
 	}
 }

@@ -1,10 +1,18 @@
 ---
 import "../styles/global.css";
 import "@fontsource-variable/newsreader";
+import "@fontsource-variable/newsreader/wght-italic.css";
 import "@fontsource-variable/inter-tight";
 import Header2Block from "@/components/blocks/header-2.astro";
 import { ThemeProvider } from "@/components/ui/theme-toggle";
 import Footer3Block from "@/components/blocks/footer-3.astro";
+import LogoMask from "@/components/LogoMask.astro";
+interface Props {
+  showPublicHeader?: boolean;
+  showPublicFooter?: boolean;
+}
+
+const { showPublicHeader = true, showPublicFooter = true }: Props = Astro.props;
 ---
 
 <!doctype html>
@@ -19,48 +27,69 @@ import Footer3Block from "@/components/blocks/footer-3.astro";
     <title>Lingua Forte: English classes and tutoring</title>
   </head>
   <body>
-    <Header2Block
-      logo={{
-        label: "Lingua Forte",
-        href: "/",
-      }}
-      navigation={[
-        { label: "About", href: "#about" },
-        { label: "Programs", href: "#programs" },
-        { label: "How it works", href: "#how-it-works" },
-      ]}
-      buttons={[{ label: "Get started", href: "/signup", variant: "default" }]}
-    />
-    <slot />
-    <Footer3Block
-      brandName="Lingua Forte"
-      brandHref="/"
-      description="Personalized English classes built on dialogue, for any exam and everyday communication."
-      columns={[
-        {
-          title: "Explore",
-          links: [
+    {
+      showPublicHeader && (
+        <Header2Block
+          logo={{
+            label: "Lingua Forte",
+            alt: "Lingua Forte logo",
+            href: "/",
+          }}
+          navigation={[
             { label: "About", href: "#about" },
             { label: "Programs", href: "#programs" },
             { label: "How it works", href: "#how-it-works" },
-            { label: "FAQs", href: "#faqs" },
-          ],
-        },
-        {
-          title: "Contact",
-          links: [
-            { label: "linguforte@protonmail.com", href: "mailto:linguforte@protonmail.com", icon: "mail" },
-            { label: "Griffintown, Montreal, QC", href: "https://maps.google.com/?q=Griffintown+Montreal+QC", icon: "map-pin" },
-            { label: "Weekdays, 8am-4pm EDT", href: "#", icon: "clock" },
-          ],
-        },
-      ]}
-      copyright="© 2026 Lingua Forte"
-      bottomLinks={[
-        { label: "Privacy", href: "/" },
-        { label: "Terms", href: "/" },
-        { label: "Sitemap", href: "/" },
-      ]}
-    />
+          ]}
+          buttons={[
+            { label: "Get started", href: "/signup", variant: "default" },
+          ]}
+        >
+          <LogoMask slot="logo" />
+        </Header2Block>
+      )
+    }
+    <slot />
+    {
+      showPublicFooter && (
+        <Footer3Block
+          brandName="Lingua Forte"
+          brandHref="/"
+          description="Personalized English classes built on dialogue, for any exam and everyday communication."
+          columns={[
+            {
+              title: "Explore",
+              links: [
+                { label: "About", href: "#about" },
+                { label: "Programs", href: "#programs" },
+                { label: "How it works", href: "#how-it-works" },
+                { label: "FAQs", href: "#faqs" },
+              ],
+            },
+            {
+              title: "Contact",
+              links: [
+                {
+                  label: "linguforte@protonmail.com",
+                  href: "mailto:linguforte@protonmail.com",
+                  icon: "mail",
+                },
+                {
+                  label: "Griffintown, Montreal, QC",
+                  href: "https://maps.google.com/?q=Griffintown+Montreal+QC",
+                  icon: "map-pin",
+                },
+                { label: "Weekdays, 8am-4pm EDT", href: "#", icon: "clock" },
+              ],
+            },
+          ]}
+          copyright="© 2026 Lingua Forte"
+          bottomLinks={[
+            { label: "Privacy", href: "/" },
+            { label: "Terms", href: "/" },
+            { label: "Sitemap", href: "/" },
+          ]}
+        />
+      )
+    }
   </body>
 </html>

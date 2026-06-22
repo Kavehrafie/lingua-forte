@@ -1,0 +1,32 @@
+---
+// CSS-mask logo — two spans, each masked to one word of the logo.
+// Fills are CSS-driven via bg-primary / bg-accent → responsive to light/dark mode.
+// SVGs inlined as base64 data URIs — completely bypasses image service.
+import linguaRaw from "@/assets/lingua.svg?raw";
+import forteRaw from "@/assets/forte.svg?raw";
+
+const linguaUri = `data:image/svg+xml;base64,${Buffer.from(linguaRaw).toString("base64")}`;
+const forteUri = `data:image/svg+xml;base64,${Buffer.from(forteRaw).toString("base64")}`;
+
+// lingua: viewBox 112.02 × 22.89 → aspect-ratio 4.893
+// forte:   viewBox  99.31 × 52.94 → aspect-ratio 1.876
+// Widths derived from aspect-ratio, so they scale with height changes.
+
+const maskStyle = (uri: string, ratio: string) =>
+  `mask-image: url('${uri}'); -webkit-mask-image: url('${uri}'); mask-size: auto 100%; mask-repeat: no-repeat; mask-position: left center; aspect-ratio: ${ratio};`;
+---
+
+<div class="inline-flex items-center gap-0">
+  <span
+    class="inline-block h-4 bg-primary align-middle"
+    style={maskStyle(linguaUri, "4.893")}
+    aria-hidden="true"
+  >
+  </span>
+  <span
+    class="inline-block h-8 bg-accent align-middle"
+    style={maskStyle(forteUri, "1.876")}
+    aria-hidden="true"
+  >
+  </span>
+</div>

@@ -54,18 +54,19 @@ const { class: className, logo, navigation, buttons } = Astro.props;
 <Header variant="floating" class={cn("", className)}>
   <HeaderContainer class="justify-between">
     <HeaderGroup>
-      <Logo href={logo.href}>
-        <LogoImage
-          src={logo.src}
-          srcLight={logo.srcLight}
-          srcDark={logo.srcDark}
-          alt={logo.alt}
-        />
-        {logo.label && (
-          <LogoText>
-            <Brand />
-          </LogoText>
-        )}
+      <Logo href={logo.href} aria-label={logo.label}>
+        {
+          logo.src ? (
+            <LogoImage
+              src={logo.src}
+              srcLight={logo.srcLight}
+              srcDark={logo.srcDark}
+              alt={logo.alt}
+            />
+          ) : (
+            <slot name="logo" />
+          )
+        }
       </Logo>
     </HeaderGroup>
     <NavigationMenu

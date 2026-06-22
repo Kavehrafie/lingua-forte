@@ -4,7 +4,7 @@ import { getDb } from "./db";
 import { magicLink } from "better-auth/plugins";
 import { cloudflareEmail } from "better-auth-cloudflare-email";
 
-export const createAuth = (env: Env | null) => {
+export const createAuth = (env: Cloudflare.Env | null) => {
   // CLI path (env is null): minimal instance for `better-auth` schema generation.
   // drizzle(null!) is safe because the CLI never executes queries — it only
   // reads table definitions from the schema.

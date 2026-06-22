@@ -1,0 +1,112 @@
+---
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+import { Textarea } from "@/components/ui/textarea";
+import Layout from "@/layouts/AdminLayout.astro";
+import { actions, isInputError } from "astro:actions";
+
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+export const prerender = false;
+
+const result = Astro.getActionResult(actions.createPage);
+
+if (result && !result.error) {
+  return Astro.redirect(`/admin/page/${result.data.id}`);
+}
+
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const pathConflict =
+  result?.error &&
+  !isInputError(result.error) &&
+  result.error.code === "CONFLICT"
+    ? result.error.message
+    : null;
+const pathInvalid = Boolean(fieldErrors.path) || Boolean(pathConflict);
+---
+
+<Layout {user}>
+  <div class="mx-auto w-full max-w-2xl py-6">
+    <h1 class="text-2xl font-semibold tracking-tight">Create a new page</h1>
+    <p class="mt-2 text-muted-foreground">
+      Enter the title and path. You can add content blocks after creating it.
+    </p>
+
+    <Form
+      class="mt-6 flex w-full flex-col gap-6"
+      method="post"
+      action={actions.createPage}
+    >
+      <FieldGroup>
+        <Field data-invalid={fieldErrors.title ? "true" : undefined}>
+          <FieldLabel for="title">Title</FieldLabel>
+          <Input
+            id="title"
+            name="title"
+            placeholder="Getting Started"
+            aria-invalid={fieldErrors.title ? "true" : undefined}
+          />
+          {
+            fieldErrors.title && (
+              <FieldError>{fieldErrors.title.join(", ")}</FieldError>
+            )
+          }
+        </Field>
+
+        <Field data-invalid={pathInvalid ? "true" : undefined}>
+          <FieldLabel for="path">Path</FieldLabel>
+          <Input
+            id="path"
+            name="path"
+            placeholder="getting-started"
+            aria-invalid={pathInvalid ? "true" : undefined}
+          />
+          <FieldDescription>
+            Lowercase, hyphenated. Leading and trailing slashes are stripped
+            automatically.
+          </FieldDescription>
+          {
+            fieldErrors.path && (
+              <FieldError>{fieldErrors.path.join(", ")}</FieldError>
+            )
+          }
+          {pathConflict && <FieldError>{pathConflict}</FieldError>}
+        </Field>
+
+        <Field>
+          <FieldLabel for="abstract">Abstract</FieldLabel>
+          <Textarea
+            id="abstract"
+            name="abstract"
+            placeholder="Short summary shown in listings"
+          />
+          <FieldDescription>Optional. Shown in page listings.</FieldDescription>
+        </Field>
+
+        <Field>
+          <FieldLabel for="keywords">Keywords</FieldLabel>
+          <Input
+            id="keywords"
+            name="keywords"
+            placeholder="classes, tutoring, english"
+          />
+          <FieldDescription>Comma-separated.</FieldDescription>
+        </Field>
+      </FieldGroup>
+
+      <Button type="submit" class="w-fit self-end">Create page</Button>
+    </Form>
+  </div>
+</Layout>

@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Faqs4Block from "@/components/blocks/faqs-4.astro";
-import placeholderImage from "@/assets/naassom-azevedo-Q_Sei-TqSlc-unsplash.jpg";
+import placeholderImage from "@/assets/hero-sample-light.png";
 import Steps from "@/components/blocks/steps.astro";
 import Hero8Block from "@/components/blocks/hero-8.astro";
 // import AboutBlock from "@/components/blocks/about.astro";
@@ -11,13 +11,12 @@ import Hero8Block from "@/components/blocks/hero-8.astro";
   <Hero8Block
     title="Speak with <em class='text-accent'>confidence</em>. Learn through real conversation."
     description="Personalized English classes tailored to your goals. Ready for any exam, every conversation."
-    buttons={[
-      { label: "Get started", href: "/signup", variant: "default" },
-    ]}
-    image={{ src: placeholderImage, alt: "Two people in fluent English conversation" }}
+    buttons={[{ label: "Get started", href: "/signup", variant: "default" }]}
+    image={{
+      src: placeholderImage,
+      alt: "Two people in fluent English conversation",
+    }}
   />
-
-
 
   <Steps />
   <Faqs4Block
