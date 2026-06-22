@@ -1,0 +1,113 @@
+---
+import { actions, isInputError } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { FieldGroup } from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import StageIndicator from "@/components/signup/StageIndicator.astro";
+import { readDraft, stageReached } from "@/lib/server/signup-draft";
+import { listCourses } from "@/lib/courses";
+import { cn } from "@/lib/utils";
+
+export const prerender = false;
+
+const draft = readDraft(Astro.cookies);
+if (stageReached(draft) < 2) {
+  return Astro.redirect("/signup/1");
+}
+
+const courses = await listCourses();
+
+const result = Astro.getActionResult(actions.signupStage2);
+if (result && !result.error) {
+  return Astro.redirect("/signup/3");
+}
+
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const genericError =
+  result?.error && !isInputError(result.error)
+    ? result.error.message
+    : null;
+---
+
+<Layout>
+  <section class="mx-auto w-full max-w-xl px-6 py-16">
+    <StageIndicator current={2} class="mb-10" />
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl">Pick a course</CardTitle>
+        <CardDescription>
+          Which program fits your goals? You can change this later.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        {genericError && (
+          <div
+            role="alert"
+            class="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+          >
+            {genericError}
+          </div>
+        )}
+
+        <Form method="post" action={actions.signupStage2}>
+          <FieldGroup>
+            <fieldset class="grid gap-3">
+              <legend class="sr-only">Course</legend>
+              {
+                courses.map((course) => {
+                  const checked = draft.courseId === course.id;
+                  return (
+                    <label
+                      class={cn(
+                        "flex cursor-pointer gap-3 rounded-lg border p-4 transition-colors",
+                        checked
+                          ? "border-primary bg-primary/5"
+                          : "hover:border-foreground/20",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="courseId"
+                        value={course.id}
+                        checked={checked}
+                        class="mt-1 size-4 accent-primary"
+                      />
+                      <span class="flex-1">
+                        <span class="block font-medium">{course.title}</span>
+                        <span class="mt-0.5 block text-sm text-muted-foreground">
+                          {course.description}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })
+              }
+            </fieldset>
+            {fieldErrors.courseId && (
+              <p class="text-sm font-medium text-destructive">
+                {fieldErrors.courseId.join(", ")}
+              </p>
+            )}
+
+            <div class="flex items-center justify-between">
+              <Button as="a" variant="ghost" href="/signup/1">
+                Back
+              </Button>
+              <Button type="submit">Continue</Button>
+            </div>
+          </FieldGroup>
+        </Form>
+      </CardContent>
+    </Card>
+  </section>
+</Layout>

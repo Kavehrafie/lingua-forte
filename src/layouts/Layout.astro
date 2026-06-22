@@ -60,10 +60,10 @@ const { showPublicHeader = true, showPublicFooter = true }: Props = Astro.props;
             {
               title: "Explore",
               links: [
-                { label: "About", href: "#about" },
-                { label: "Programs", href: "#programs" },
-                { label: "How it works", href: "#how-it-works" },
-                { label: "FAQs", href: "#faqs" },
+                { label: "About", href: "/about" },
+                { label: "Programs", href: "/programs" },
+                // { label: "How it works", href: "/how-it-works" },
+                { label: "FAQs", href: "/#faqs" },
               ],
             },
             {
@@ -85,9 +85,8 @@ const { showPublicHeader = true, showPublicFooter = true }: Props = Astro.props;
           ]}
           copyright="© 2026 Lingua Forte"
           bottomLinks={[
-            { label: "Privacy", href: "/" },
-            { label: "Terms", href: "/" },
-            { label: "Sitemap", href: "/" },
+            { label: "Privacy", href: "/privacy" },
+            { label: "Terms", href: "/terms" },
           ]}
         />
       )

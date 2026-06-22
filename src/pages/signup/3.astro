@@ -1,0 +1,126 @@
+---
+import { actions, isInputError } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import StageIndicator from "@/components/signup/StageIndicator.astro";
+import { readDraft, stageReached } from "@/lib/server/signup-draft";
+import { listInterviewSlots } from "@/lib/server/signup";
+import { formatDateInTz } from "@/lib/time";
+
+export const prerender = false;
+
+const draft = readDraft(Astro.cookies);
+if (stageReached(draft) < 3) {
+  return Astro.redirect("/signup/1");
+}
+
+const slots = await listInterviewSlots({ upcomingOnly: true });
+
+const result = Astro.getActionResult(actions.signupStage3);
+if (result && !result.error) {
+  return Astro.redirect("/signup/4");
+}
+
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const genericError =
+  result?.error && !isInputError(result.error)
+    ? result.error.message
+    : null;
+
+const fmt = (d: Date) =>
+  formatDateInTz(d, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+---
+
+<Layout>
+  <section class="mx-auto w-full max-w-xl px-6 py-16">
+    <StageIndicator current={3} class="mb-10" />
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl">Pick an interview time</CardTitle>
+        <CardDescription>
+          Each slot is a 1:1 level-determination interview. Pick the one that
+          works for you.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        {genericError && (
+          <div
+            role="alert"
+            class="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+          >
+            {genericError}
+          </div>
+        )}
+
+        <Form method="post" action={actions.signupStage3}>
+          <FieldGroup>
+            <FieldLabel for="slot-id">Available times</FieldLabel>
+            {slots.length === 0 ? (
+              <p class="rounded-md border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                No interview slots are available right now. Please check back
+                soon.
+              </p>
+            ) : (
+              <Combobox
+                class="w-full"
+                name="slotId"
+                defaultValue={draft.slotId}
+                placeholder="Search available times…"
+                required
+              >
+                <ComboboxInput id="slot-id" />
+                <ComboboxContent>
+                  <ComboboxEmpty>No matching times.</ComboboxEmpty>
+                  <ComboboxList>
+                    {slots.map((slot) => (
+                      <ComboboxItem value={slot.id}>
+                        {fmt(slot.startsAt)}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
+            {fieldErrors.slotId && (
+              <p class="text-sm font-medium text-destructive">
+                {fieldErrors.slotId.join(", ")}
+              </p>
+            )}
+
+            <div class="flex items-center justify-between">
+              <Button as="a" variant="ghost" href="/signup/2">Back</Button>
+              <Button type="submit" disabled={slots.length === 0}>
+                Continue
+              </Button>
+            </div>
+          </FieldGroup>
+        </Form>
+      </CardContent>
+    </Card>
+  </section>
+</Layout>

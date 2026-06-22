@@ -1,27 +1,4 @@
-<!-- ---
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 ---
-
-<Tabs defaultValue="tab-1" class="w-full max-w-sm">
-  <TabsList class="grid w-full grid-cols-2">
-    <TabsTrigger value="tab-1">Account</TabsTrigger>
-    <TabsTrigger value="tab-2">Password</TabsTrigger>
-  </TabsList>
-  <TabsContent value="tab-1">
-    <div class="rounded-md border p-4">
-      <h3 class="mb-2 font-semibold">Account</h3>
-      <p class="text-muted-foreground text-sm">
-        Make changes to your account here. Click save when you're done.
-      </p>
-    </div>
-  </TabsContent>
-  <TabsContent value="tab-2">
-    <div class="rounded-md border p-4">
-      <h3 class="mb-2 font-semibold">Password</h3>
-      <p class="text-muted-foreground text-sm">
-        Change your password here. You will be logged out after changing your
-        password.
-      </p>
-    </div>
-  </TabsContent>
-</Tabs> -->
+export const prerender = false;
+return Astro.redirect("/signup/1");
+---

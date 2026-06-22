@@ -10,11 +10,32 @@ import {
   deleteBlockInput,
   deletePageInput,
   reorderBlocksInput,
+  signupStage1Input,
+  signupStage2Input,
+  signupStage3Input,
+  signupCompleteInput,
+  addInterviewSlotInput,
+  removeInterviewSlotInput,
+  cancelSignupInput,
 } from "./schema";
 import { getDb } from "@/lib/server/db";
 import { page, pageBlock } from "@/lib/server/db/schema";
 import { getBlockById, nextBlockPosition } from "@/lib/server/page";
 import { heroBlockFields, stepsBlockFields } from "@/lib/block-fields";
+import { findCourseById } from "@/lib/courses";
+import {
+  readDraft,
+  writeDraft,
+  clearDraft,
+} from "@/lib/server/signup-draft";
+import {
+  completeSignup,
+  addInterviewSlot,
+  removeInterviewSlot,
+  cancelSignup,
+  getInterviewSlot,
+  SlotTakenError,
+} from "@/lib/server/signup";
 
 export const server = {
   createPage: defineAction({
@@ -297,6 +318,184 @@ export const server = {
       });
 
       return { success: true };
+    },
+  }),
+
+  // ── Signup flow ──
+  // Each stage action reads the prior draft from the cookie, validates the
+  // current stage's input against the current DB/YAML state, and writes the
+  // merged draft back. Pages handle the redirect on success.
+
+  signupStage1: defineAction({
+    input: signupStage1Input,
+    accept: "form",
+    handler: async ({ name, email }, ctx) => {
+      const draft = readDraft(ctx.cookies);
+      writeDraft(ctx.cookies, { ...draft, name, email });
+      return { ok: true };
+    },
+  }),
+
+  signupStage2: defineAction({
+    input: signupStage2Input,
+    accept: "form",
+    handler: async ({ courseId }, ctx) => {
+      const draft = readDraft(ctx.cookies);
+      if (!draft.name || !draft.email) {
+        throw new ActionError({
+          code: "PRECONDITION_FAILED",
+          message: "Please start from step 1.",
+        });
+      }
+
+      const course = await findCourseById(courseId);
+      if (!course) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: "Please pick a valid course.",
+        });
+      }
+
+      writeDraft(ctx.cookies, {
+        ...draft,
+        courseId: course.id,
+        courseTitle: course.title,
+      });
+      return { ok: true };
+    },
+  }),
+
+  signupStage3: defineAction({
+    input: signupStage3Input,
+    accept: "form",
+    handler: async ({ slotId }, ctx) => {
+      const draft = readDraft(ctx.cookies);
+      if (!draft.name || !draft.email || !draft.courseId) {
+        throw new ActionError({
+          code: "PRECONDITION_FAILED",
+          message: "Please start from step 1.",
+        });
+      }
+
+      const slot = await getInterviewSlot(slotId);
+      if (!slot) {
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: "Please pick an available date.",
+        });
+      }
+
+      writeDraft(ctx.cookies, {
+        ...draft,
+        slotId: slot.id,
+        bookedFor: slot.startsAt.getTime(),
+      });
+      return { ok: true };
+    },
+  }),
+
+  signupComplete: defineAction({
+    input: signupCompleteInput,
+    accept: "form",
+    handler: async ({ note }, ctx) => {
+      const draft = readDraft(ctx.cookies);
+      if (
+        !draft.name ||
+        !draft.email ||
+        !draft.courseTitle ||
+        !draft.slotId ||
+        typeof draft.bookedFor !== "number"
+      ) {
+        throw new ActionError({
+          code: "PRECONDITION_FAILED",
+          message: "Please complete the previous steps.",
+        });
+      }
+
+      try {
+        const result = await completeSignup({
+          fullName: draft.name,
+          email: draft.email,
+          courseTitle: draft.courseTitle,
+          bookedFor: new Date(draft.bookedFor),
+          note: note?.trim() || undefined,
+          slotId: draft.slotId,
+        });
+        clearDraft(ctx.cookies);
+        return { id: result.id };
+      } catch (err: unknown) {
+        if (err instanceof SlotTakenError) {
+          throw new ActionError({
+            code: "CONFLICT",
+            message:
+              "This date was just taken by someone else. Please pick another.",
+          });
+        }
+        throw err;
+      }
+    },
+  }),
+
+  // ── Admin: interview slots ──
+
+  addInterviewSlot: defineAction({
+    input: addInterviewSlotInput,
+    accept: "form",
+    handler: async ({ startsAt }, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to manage interview slots.",
+        });
+      }
+
+      return Promise.try(() => addInterviewSlot(startsAt)).catch(
+        (err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          if (message.includes("UNIQUE constraint failed")) {
+            throw new ActionError({
+              code: "CONFLICT",
+              message: "A slot at that date and time already exists.",
+            });
+          }
+          throw err;
+        },
+      );
+    },
+  }),
+
+  removeInterviewSlot: defineAction({
+    input: removeInterviewSlotInput,
+    handler: async ({ id }, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to remove interview slots.",
+        });
+      }
+      await removeInterviewSlot(id);
+      return { ok: true };
+    },
+  }),
+
+  cancelSignup: defineAction({
+    input: cancelSignupInput,
+    handler: async ({ id }, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to cancel a signup.",
+        });
+      }
+
+      const result = await cancelSignup(id);
+      if (!result) {
+        throw new ActionError({
+          code: "NOT_FOUND",
+          message: "Signup not found.",
+        });
+      }
+      return { ok: true };
     },
   }),
 };

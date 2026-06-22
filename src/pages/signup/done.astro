@@ -1,0 +1,120 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { getSignup } from "@/lib/server/signup";
+import { site } from "@/lib/site";
+import { formatDateInTz, TIMEZONE } from "@/lib/time";
+
+export const prerender = false;
+
+const id = Astro.url.searchParams.get("id");
+if (!id) {
+  return Astro.redirect("/signup/1");
+}
+
+const signup = await getSignup(id);
+if (!signup) {
+  return Astro.redirect("/signup/1");
+}
+
+const fmt = (d: Date) =>
+  formatDateInTz(d, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+---
+
+<Layout>
+  <section class="mx-auto w-full max-w-xl px-6 py-16">
+    <div class="mb-8 flex flex-col items-center text-center">
+      <div
+        class="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary"
+      >
+        <Icon name="check" class="size-7" />
+      </div>
+      <h1 class="text-3xl font-semibold tracking-tight">You're booked in</h1>
+      <p class="mt-2 max-w-md text-muted-foreground">
+        Your level-determination interview is reserved. We'll email a video
+        link and prep notes before your slot — expect to hear from us within
+        a day.
+      </p>
+    </div>
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-lg">Booking summary</CardTitle>
+        <CardDescription>
+          Save the date — add it to your calendar below.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        <dl class="grid gap-3 rounded-lg border p-4 text-sm">
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Name</dt>
+            <dd class="font-medium">{signup.fullName}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Email</dt>
+            <dd class="font-medium">{signup.email}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Course</dt>
+            <dd class="font-medium">{signup.courseTitle}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Interview</dt>
+            <dd class="font-medium">{fmt(signup.bookedFor)}</dd>
+          </div>
+        </dl>
+
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button as="a" href={`/signup/invite/${signup.id}.ics`}>
+            <Icon name="calendar" />
+            Add to calendar
+          </Button>
+          <Button as="a" variant="outline" href="/">
+            <Icon name="arrow-left" />
+            Back to home
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+
+    <div class="mt-6 rounded-lg border bg-muted/30 p-4 text-sm">
+      <p class="font-medium">Need to reach us?</p>
+      <p class="mt-1 text-muted-foreground">
+        Reply to your confirmation email or contact us directly — we usually
+        respond within one business day.
+      </p>
+      <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:gap-6">
+        <a
+          href={`mailto:${site.email}`}
+          class="inline-flex items-center gap-2 font-medium hover:underline"
+        >
+          <Icon name="mail" class="size-4" />
+          {site.email}
+        </a>
+        <a
+          href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}
+          class="inline-flex items-center gap-2 font-medium hover:underline"
+        >
+          <Icon name="phone" class="size-4" />
+          {site.phone}
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

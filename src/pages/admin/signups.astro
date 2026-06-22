@@ -1,0 +1,51 @@
+---
+import Layout from "@/layouts/AdminLayout.astro";
+import { listSignups } from "@/lib/server/signup";
+import SignupsList from "@/components/admin/SignupsList.astro";
+
+export const prerender = false;
+
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+const signups = await listSignups();
+---
+
+<Layout {user}>
+  <div class="mx-auto w-full max-w-5xl py-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-semibold tracking-tight">Signups</h1>
+      <p class="text-sm text-muted-foreground">
+        All booking submissions. Cancelling a signup marks it cancelled and
+        returns its slot to the pool.
+      </p>
+    </div>
+
+    <SignupsList signups={signups} />
+  </div>
+</Layout>
+
+<script>
+  import { actions } from "astro:actions";
+
+  document.querySelectorAll("button[data-signup-id]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const id = button.getAttribute("data-signup-id");
+      if (!id) return;
+      if (
+        !confirm(
+          "Cancel this signup? The interview slot will go back into the pool.",
+        )
+      )
+        return;
+      const { error } = await actions.cancelSignup({ id });
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      window.location.reload();
+    });
+  });
+</script>

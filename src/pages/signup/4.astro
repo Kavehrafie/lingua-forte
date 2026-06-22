@@ -1,0 +1,151 @@
+---
+import { actions, isInputError } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import StageIndicator from "@/components/signup/StageIndicator.astro";
+import { readDraft, stageReached } from "@/lib/server/signup-draft";
+import { getInterviewSlot } from "@/lib/server/signup";
+import { findCourseById } from "@/lib/courses";
+import { formatDateInTz } from "@/lib/time";
+
+export const prerender = false;
+
+// Check the action result BEFORE stage-gating. signupComplete clears the
+// draft cookie on success — if we read the (now-empty) cookie first, the
+// stage gate would bounce the user to /signup/1 before we ever see the
+// success result and could redirect to /done with the id.
+const result = Astro.getActionResult(actions.signupComplete);
+if (result && !result.error && result.data) {
+  return Astro.redirect(`/signup/done?id=${result.data.id}`);
+}
+
+const draft = readDraft(Astro.cookies);
+if (stageReached(draft) < 4) {
+  return Astro.redirect("/signup/1");
+}
+
+// Re-validate against current DB/YAML state — if the slot or course
+// disappeared since the visitor picked it, send them back.
+const [course, slot] = await Promise.all([
+  draft.courseId ? findCourseById(draft.courseId) : undefined,
+  draft.slotId ? getInterviewSlot(draft.slotId) : null,
+]);
+
+if (!course || !slot) {
+  return Astro.redirect("/signup/2");
+}
+
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const conflictError =
+  result?.error &&
+  !isInputError(result.error) &&
+  result.error.code === "CONFLICT"
+    ? result.error.message
+    : null;
+const genericError =
+  result?.error &&
+  !isInputError(result.error) &&
+  result.error.code !== "CONFLICT"
+    ? result.error.message
+    : null;
+
+const fmt = (d: Date) =>
+  formatDateInTz(d, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+---
+
+<Layout>
+  <section class="mx-auto w-full max-w-xl px-6 py-16">
+    <StageIndicator current={4} class="mb-10" />
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl">Review and confirm</CardTitle>
+        <CardDescription>
+          Make sure everything looks right, then book your interview.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        {
+          (conflictError || genericError) && (
+            <div
+              role="alert"
+              class="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+            >
+              {conflictError ?? genericError}
+            </div>
+          )
+        }
+
+        <dl class="mb-6 grid gap-3 rounded-lg border p-4 text-sm">
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Name</dt>
+            <dd class="font-medium">{draft.name}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Email</dt>
+            <dd class="font-medium">{draft.email}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Course</dt>
+            <dd class="font-medium">{course.title}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4">
+            <dt class="text-muted-foreground">Interview</dt>
+            <dd class="font-medium">{fmt(slot.startsAt)}</dd>
+          </div>
+        </dl>
+
+        <Form method="post" action={actions.signupComplete}>
+          <FieldGroup>
+            <Field data-invalid={fieldErrors.note ? "true" : undefined}>
+              <FieldLabel for="note">Note (optional)</FieldLabel>
+              <Textarea
+                id="note"
+                name="note"
+                rows={4}
+                placeholder="Anything we should know before the interview? Goals, availability, prior experience…"
+                aria-invalid={fieldErrors.note ? "true" : undefined}
+              />
+              <FieldDescription>
+                Optional. Visible to your interviewer.
+              </FieldDescription>
+              {
+                fieldErrors.note && (
+                  <FieldError>{fieldErrors.note.join(", ")}</FieldError>
+                )
+              }
+            </Field>
+
+            <div class="flex items-center justify-between">
+              <Button as="a" variant="ghost" href="/signup/3">Back</Button>
+              <Button type="submit">Book interview</Button>
+            </div>
+          </FieldGroup>
+        </Form>
+      </CardContent>
+    </Card>
+  </section>
+</Layout>

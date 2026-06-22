@@ -1,0 +1,66 @@
+---
+import { cn } from "@/lib/utils";
+
+interface Props {
+  current: 1 | 2 | 3 | 4;
+  class?: string;
+}
+
+const { current, class: className } = Astro.props;
+
+const stages: Array<{ n: 1 | 2 | 3 | 4; label: string; href: string }> = [
+  { n: 1, label: "You", href: "/signup/1" },
+  { n: 2, label: "Course", href: "/signup/2" },
+  { n: 3, label: "Date", href: "/signup/3" },
+  { n: 4, label: "Confirm", href: "/signup/4" },
+];
+---
+
+<ol
+  class={cn(
+    "flex items-center gap-2 text-xs font-medium text-muted-foreground",
+    className,
+  )}
+  aria-label="Signup progress"
+>
+  {
+    stages.map((stage, i) => {
+      const state =
+        stage.n < current ? "done" : stage.n === current ? "current" : "todo";
+      return (
+        <li class="flex items-center gap-2">
+          <span
+            class={cn(
+              "inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5",
+              state === "done" &&
+                "border-primary/30 bg-primary/10 text-primary",
+              state === "current" &&
+                "border-foreground/20 bg-background text-foreground",
+              state === "todo" && "border-transparent text-muted-foreground/60",
+            )}
+          >
+            <span
+              class={cn(
+                "flex h-4 w-4 items-center justify-center rounded-full text-[10px]",
+                state === "done" && "bg-primary text-primary-foreground",
+                state === "current" && "bg-foreground text-background",
+                state === "todo" && "bg-muted text-muted-foreground",
+              )}
+            >
+              {state === "done" ? "✓" : stage.n}
+            </span>
+            <span class="hidden sm:inline">{stage.label}</span>
+          </span>
+          {i < stages.length - 1 && (
+            <span
+              class={cn(
+                "h-px w-6",
+                state === "done" ? "bg-primary/40" : "bg-border",
+              )}
+            />
+          )}
+        </li>
+      );
+    })
+  }
+</ol>

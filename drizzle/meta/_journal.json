@@ -15,6 +15,13 @@
       "when": 1782034508992,
       "tag": "0001_solid_spirit",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782164449471,
+      "tag": "0002_romantic_roulette",
+      "breakpoints": true
     }
   ]
 }

@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.7.0",
 		"@data-slot/accordion": "^0.2.166",
+		"@data-slot/combobox": "^0.2.166",
 		"@data-slot/dialog": "^0.2.166",
 		"@data-slot/dropdown-menu": "^0.2.166",
 		"@data-slot/navigation-menu": "^0.2.166",

@@ -62,3 +62,52 @@ export const pageBlockRelation = relations(pageBlock, ({ one }) => ({
 export const pageRelation = relations(page, ({ many }) => ({
   blocks: many(pageBlock),
 }));
+
+export const interviewSlot = sqliteTable(
+  "interview_slot",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    startsAt: integer("starts_at", { mode: "timestamp" }).notNull().unique(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .$onUpdate(() => /* @__PURE__ */ new Date()),
+  },
+);
+
+export const signup = sqliteTable("signup", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(),
+  // Snapshot from YAML at finalize time — the YAML may change later but
+  // the signup record should stay accurate to what the visitor picked.
+  courseTitle: text("course_title").notNull(),
+  // Snapshot of the slot's startsAt. The slot row is hard-deleted on
+  // finalize, so we can't rely on a FK to recover the date later.
+  bookedFor: integer("booked_for", { mode: "timestamp" }).notNull(),
+  note: text("note"),
+  status: text("status", { enum: ["confirmed", "cancelled"] })
+    .notNull()
+    .default("confirmed"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .$onUpdate(() => /* @__PURE__ */ new Date()),
+});
+
+export const interviewSlotRelations = relations(
+  interviewSlot,
+  () => ({}),
+);
+
+export const signupRelations = relations(signup, () => ({}));

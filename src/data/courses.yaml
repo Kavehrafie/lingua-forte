@@ -1,0 +1,23 @@
+- id: general-english
+  title: General English
+  description: Build fluency and confidence for everyday conversation, from beginner to advanced.
+
+- id: ielts-preparation
+  title: IELTS Preparation
+  description: Targeted practice and strategy for the IELTS exam — all four sections.
+
+- id: toefl-preparation
+  title: TOEFL Preparation
+  description: Test-taking strategies and skills work for the TOEFL iBT across reading, listening, speaking, and writing.
+
+- id: business-english
+  title: Business English
+  description: Professional communication — meetings, emails, presentations, and interviews.
+
+- id: academic-english
+  title: Academic English
+  description: University-level writing, reading, and discussion for students preparing for study in English.
+
+- id: tutoring
+  title: 1:1 Tutoring
+  description: Private sessions tailored to your goals, schedule, and level.

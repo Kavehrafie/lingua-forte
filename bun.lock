@@ -7,6 +7,7 @@
       "dependencies": {
         "@astrojs/cloudflare": "^13.7.0",
         "@data-slot/accordion": "^0.2.166",
+        "@data-slot/combobox": "^0.2.166",
         "@data-slot/dialog": "^0.2.166",
         "@data-slot/dropdown-menu": "^0.2.166",
         "@data-slot/navigation-menu": "^0.2.166",
@@ -162,6 +163,8 @@
     "@cspotcode/source-map-support": ["@cspotcode/source-map-support@0.8.1", "", { "dependencies": { "@jridgewell/trace-mapping": "0.3.9" } }, "sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw=="],
 
     "@data-slot/accordion": ["@data-slot/accordion@0.2.166", "", { "dependencies": { "@data-slot/core": "0.2.166" } }, "sha512-MViSr1Nikj5PqL8aFTQMonG/9SHXYskWK0DTc8OyUvLBg5x2mwTQVTwlPxy114ZH4BMOAYlTXpZ+XuvOrDgH9Q=="],
+
+    "@data-slot/combobox": ["@data-slot/combobox@0.2.166", "", { "dependencies": { "@data-slot/core": "0.2.166" } }, "sha512-BPF4WKfTFeiksrlp8kyU7g3iEuICY9EBoWzrrzDWmq8di3nDI3phAO2f42M6xG7JSNf6Rvu9K8IsXzOyZk5DXA=="],
 
     "@data-slot/core": ["@data-slot/core@0.2.166", "", {}, "sha512-/DuzMFIqiefdjheX5fMhaqs4YPp0/t+/pN9EgnB2jLSDk8384WkBCPGq76T/Ypb0MjVlHFiexKDnx9+k+bdcjw=="],
 

@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -12,11 +13,9 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Icon } from "@/components/ui/icon";
 import type { User } from "better-auth";
-import { Button } from "@/components/ui/button";
 
 interface Props {
   user: User;
@@ -30,6 +29,8 @@ const isPagesActive =
   pathname === "/admin/pages" ||
   pathname === "/admin" ||
   pathname.startsWith("/admin/page/");
+const isSlotsActive = pathname.startsWith("/admin/interview-slots");
+const isSignupsActive = pathname.startsWith("/admin/signups");
 ---
 
 <Layout showPublicHeader={false} showPublicFooter={false}>
@@ -52,6 +53,31 @@ const isPagesActive =
                   <span>New page</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Signups</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  href="/admin/interview-slots"
+                  isActive={isSlotsActive}
+                >
+                  <Icon name="calendar" />
+                  <span>Interview slots</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  href="/admin/signups"
+                  isActive={isSignupsActive}
+                >
+                  <Icon name="users" />
+                  <span>Signups</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton href="/">
                   <Icon name="external-link" />
@@ -63,10 +89,19 @@ const isPagesActive =
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <p class="mt-2 text-muted-foreground">
-          You are signed in as <span class="font-medium">{user.email}</span>.
-        </p>
-        <Button variant="outline" id="sign-out-btn"> Sign out </Button>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <button
+              id="sign-out-btn"
+              type="button"
+              class="flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate"
+              title="Sign out"
+            >
+              <Icon name="log-out" />
+              <span>Sign out</span>
+            </button>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset>
@@ -82,12 +117,27 @@ const isPagesActive =
 </Layout>
 
 <script>
+  // Inline script — no bundler, no imports, runs the moment the parser hits it.
+  // If the click ever stops working, this is the place to look first.
+
   import { authClient } from "@/lib/auth-client";
 
-  document
-    .getElementById("sign-out-btn")
-    ?.addEventListener("click", async () => {
+  console.log("[admin] signout script loaded");
+
+  document.addEventListener("click", async function (event) {
+    var target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (!target.closest("#sign-out-btn")) return;
+
+    event.preventDefault();
+    console.log("[sign-out] clicked");
+    try {
       await authClient.signOut();
-      window.location.href = "/";
-    });
+      // var res = await fetch("/api/auth/sign-out", { method: "POST" });
+      console.log("[sign-out] response", res.status);
+    } catch (err) {
+      console.error("[sign-out] fetch failed", err);
+    }
+    window.location.href = "/";
+  });
 </script>

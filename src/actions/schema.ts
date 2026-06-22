@@ -1,4 +1,5 @@
 import * as z from "astro/zod";
+import { parseDateTimeLocalInTz } from "@/lib/time";
 
 export const createPageInput = z.object({
   title: z.string().min(4, "Title is required"),
@@ -98,6 +99,56 @@ export const reorderBlocksInput = z.object({
   blockIds: z.array(z.string()),
 });
 
+// ── Signup flow ──
+
+export const signupStage1Input = z.object({
+  name: z.string().min(2, "Please enter your full name"),
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export const signupStage2Input = z.object({
+  courseId: z.string().min(1, "Please pick a course"),
+});
+
+export const signupStage3Input = z.object({
+  slotId: z.string().min(1, "Please pick a date"),
+});
+
+export const signupCompleteInput = z.object({
+  note: z.string().max(2000, "Note must be 2000 characters or fewer").optional(),
+});
+
+// ── Admin: interview slots ──
+
+export const addInterviewSlotInput = z.object({
+  // datetime-local input sends "YYYY-MM-DDTHH:mm" — admin enters wall-clock
+  // time in Eastern (Montréal), and we convert to the matching UTC instant.
+  startsAt: z
+    .string()
+    .min(1, "Pick a date and time")
+    .transform((val, ctx) => {
+      const parsed = parseDateTimeLocalInTz(val);
+      if (Number.isNaN(parsed.getTime())) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Pick a valid date and time",
+        });
+        return z.NEVER;
+      }
+      return parsed;
+    }),
+});
+
+export const removeInterviewSlotInput = z.object({
+  id: z.string(),
+});
+
+// ── Admin: cancel signup ──
+
+export const cancelSignupInput = z.object({
+  id: z.string(),
+});
+
 export type PageCreateInput = z.infer<typeof createPageInput>;
 export type PageUpdateInput = z.infer<typeof updatePageInput>;
 export type AddBlockInput = z.infer<typeof addBlockInput>;
@@ -105,3 +156,10 @@ export type UpdateBlockInput = z.infer<typeof updateBlockInput>;
 export type DeleteBlockInput = z.infer<typeof deleteBlockInput>;
 export type DeletePageInput = z.infer<typeof deletePageInput>;
 export type ReorderBlocksInput = z.infer<typeof reorderBlocksInput>;
+export type SignupStage1Input = z.infer<typeof signupStage1Input>;
+export type SignupStage2Input = z.infer<typeof signupStage2Input>;
+export type SignupStage3Input = z.infer<typeof signupStage3Input>;
+export type SignupCompleteInput = z.infer<typeof signupCompleteInput>;
+export type AddInterviewSlotInput = z.infer<typeof addInterviewSlotInput>;
+export type RemoveInterviewSlotInput = z.infer<typeof removeInterviewSlotInput>;
+export type CancelSignupInput = z.infer<typeof cancelSignupInput>;

@@ -1,0 +1,107 @@
+---
+import { actions, isInputError } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import StageIndicator from "@/components/signup/StageIndicator.astro";
+import { readDraft } from "@/lib/server/signup-draft";
+
+export const prerender = false;
+
+const draft = readDraft(Astro.cookies);
+
+const result = Astro.getActionResult(actions.signupStage1);
+if (result && !result.error) {
+  return Astro.redirect("/signup/2");
+}
+
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const genericError =
+  result?.error && !isInputError(result.error)
+    ? result.error.message
+    : null;
+---
+
+<Layout>
+  <section class="mx-auto w-full max-w-xl px-6 py-16">
+    <StageIndicator current={1} class="mb-10" />
+
+    <Card>
+      <CardHeader>
+        <CardTitle class="text-2xl">Get started</CardTitle>
+        <CardDescription>
+          Tell us who you are. We'll use this to set up your level-determination
+          interview.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        {genericError && (
+          <div
+            role="alert"
+            class="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+          >
+            {genericError}
+          </div>
+        )}
+
+        <Form method="post" action={actions.signupStage1}>
+          <FieldGroup>
+            <Field data-invalid={fieldErrors.name ? "true" : undefined}>
+              <FieldLabel for="name">Full name</FieldLabel>
+              <Input
+                id="name"
+                name="name"
+                autocomplete="name"
+                placeholder="Rosa Diaz"
+                value={draft.name ?? ""}
+                aria-invalid={fieldErrors.name ? "true" : undefined}
+              />
+              {fieldErrors.name && (
+                <FieldError>{fieldErrors.name.join(", ")}</FieldError>
+              )}
+            </Field>
+
+            <Field data-invalid={fieldErrors.email ? "true" : undefined}>
+              <FieldLabel for="email">Email</FieldLabel>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                placeholder="you@example.com"
+                value={draft.email ?? ""}
+                aria-invalid={fieldErrors.email ? "true" : undefined}
+              />
+              <FieldDescription>
+                We'll only use this to confirm your interview time.
+              </FieldDescription>
+              {fieldErrors.email && (
+                <FieldError>{fieldErrors.email.join(", ")}</FieldError>
+              )}
+            </Field>
+
+            <div class="flex justify-end">
+              <Button type="submit">Continue</Button>
+            </div>
+          </FieldGroup>
+        </Form>
+      </CardContent>
+    </Card>
+  </section>
+</Layout>

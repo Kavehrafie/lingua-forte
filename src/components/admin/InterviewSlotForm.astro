@@ -1,0 +1,41 @@
+---
+import { actions } from "astro:actions";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Add a slot</CardTitle>
+    <CardDescription>
+      One interview slot per date/time. Each visitor picks one and removes it
+      from the pool.
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <Form method="post" action={actions.addInterviewSlot} class="flex flex-wrap items-end gap-3">
+      <FieldGroup class="flex-1">
+        <Field>
+          <FieldLabel for="startsAt">Date and time</FieldLabel>
+          <Input
+            id="startsAt"
+            name="startsAt"
+            type="datetime-local"
+            required
+          />
+          <FieldDescription>
+            Times are in Eastern Time (Montréal) — DST handled automatically.
+          </FieldDescription>
+        </Field>
+      </FieldGroup>
+      <Button type="submit" class="gap-2">
+        <Icon name="plus" />
+        Add slot
+      </Button>
+    </Form>
+  </CardContent>
+</Card>
