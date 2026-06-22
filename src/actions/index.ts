@@ -8,6 +8,7 @@ import {
   addBlockInput,
   updateBlockInput,
   deleteBlockInput,
+  deletePageInput,
   reorderBlocksInput,
 } from "./schema";
 import { getDb } from "@/lib/server/db";
@@ -221,6 +222,35 @@ export const server = {
           .where(eq(pageBlock.id, id))
           .returning({ pageId: pageBlock.pageId }),
       ).then(([deleted]) => ({ pageId: deleted.pageId }));
+    },
+  }),
+
+  deletePage: defineAction({
+    input: deletePageInput,
+    handler: async ({ id }, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to delete a page.",
+        });
+      }
+
+      const db = getDb(env.db);
+
+      // No separate existence check — returning() will be empty if the row
+      // is already gone, which we surface as NOT_FOUND. pageBlock rows are
+      // cascaded by the schema, so one delete cleans up the tree.
+      return Promise.try(() =>
+        db.delete(page).where(eq(page.id, id)).returning({ id: page.id }),
+      ).then(([deleted]) => {
+        if (!deleted) {
+          throw new ActionError({
+            code: "NOT_FOUND",
+            message: "Page not found.",
+          });
+        }
+        return { id: deleted.id };
+      });
     },
   }),
 

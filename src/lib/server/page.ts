@@ -1,7 +1,21 @@
 import { env } from "cloudflare:workers";
-import { eq, asc, sql } from "drizzle-orm";
+import { eq, asc, sql, desc } from "drizzle-orm";
 import { getDb } from "./db";
-import { pageBlock } from "./db/schema";
+import { page, pageBlock } from "./db/schema";
+
+export const listPages = async () => {
+  const db = getDb(env.db);
+  return db.query.page.findMany({
+    orderBy: desc(page.createdAt),
+    columns: {
+      id: true,
+      title: true,
+      path: true,
+      isPublished: true,
+      updatedAt: true,
+    },
+  });
+};
 
 export const getPageByID = async (id: string) => {
   const db = getDb(env.db);

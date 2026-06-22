@@ -28,7 +28,7 @@ export const createPageInput = z.object({
 });
 
 export const updatePageInput = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   title: z.string().min(4, "Title is required"),
   path: z
     .string()
@@ -71,12 +71,12 @@ export const blockTypes = [
 ] as const;
 
 export const addBlockInput = z.object({
-  pageId: z.string().uuid(),
+  pageId: z.string(),
   type: z.enum(blockTypes),
 });
 
 export const updateBlockInput = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   content: z.string().optional(),
   // See isPublished above — same checkbox pattern.
   isVisible: z
@@ -86,12 +86,16 @@ export const updateBlockInput = z.object({
 });
 
 export const deleteBlockInput = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
+});
+
+export const deletePageInput = z.object({
+  id: z.string(),
 });
 
 export const reorderBlocksInput = z.object({
-  pageId: z.string().uuid(),
-  blockIds: z.array(z.string().uuid()),
+  pageId: z.string(),
+  blockIds: z.array(z.string()),
 });
 
 export type PageCreateInput = z.infer<typeof createPageInput>;
@@ -99,4 +103,5 @@ export type PageUpdateInput = z.infer<typeof updatePageInput>;
 export type AddBlockInput = z.infer<typeof addBlockInput>;
 export type UpdateBlockInput = z.infer<typeof updateBlockInput>;
 export type DeleteBlockInput = z.infer<typeof deleteBlockInput>;
+export type DeletePageInput = z.infer<typeof deletePageInput>;
 export type ReorderBlocksInput = z.infer<typeof reorderBlocksInput>;

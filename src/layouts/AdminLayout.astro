@@ -23,6 +23,13 @@ interface Props {
 }
 
 const { user }: Props = Astro.props;
+
+const pathname = Astro.url.pathname;
+// /admin and /admin/page/{id}... count as "Pages" too — they're all page-editing.
+const isPagesActive =
+  pathname === "/admin/pages" ||
+  pathname === "/admin" ||
+  pathname.startsWith("/admin/page/");
 ---
 
 <Layout showPublicHeader={false} showPublicFooter={false}>
@@ -30,25 +37,25 @@ const { user }: Props = Astro.props;
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupLabel>Content</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton href="/" isActive>
-                  <Icon name="house" />
-                  <span>Home</span>
+                <SidebarMenuButton href="/admin/pages" isActive={isPagesActive}>
+                  <Icon name="file-text" />
+                  <span>Pages</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
-                  <Icon name="layout-dashboard" />
-                  <span>Dashboard</span>
+                <SidebarMenuButton href="/admin/page/create">
+                  <Icon name="plus" />
+                  <span>New page</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton href="#">
-                  <Icon name="settings" />
-                  <span>Settings</span>
+                <SidebarMenuButton href="/">
+                  <Icon name="external-link" />
+                  <span>View site</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -25,11 +25,15 @@ if (!page) {
 const result = Astro.getActionResult(actions.updatePage);
 
 const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const nonInputError =
+  result?.error && !isInputError(result.error) ? result.error : null;
 const pathConflict =
-  result?.error &&
-  !isInputError(result.error) &&
-  result.error.code === "CONFLICT"
-    ? result.error.message
+  nonInputError && nonInputError.code === "CONFLICT"
+    ? nonInputError.message
+    : null;
+const genericError =
+  nonInputError && nonInputError.code !== "CONFLICT"
+    ? nonInputError.message || "Something went wrong saving the page. Please try again."
     : null;
 ---
 
@@ -39,6 +43,7 @@ const pathConflict =
       page={page}
       fieldErrors={fieldErrors}
       pathConflict={pathConflict}
+      genericError={genericError}
     />
   </div>
 </Layout>

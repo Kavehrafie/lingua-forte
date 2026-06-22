@@ -2,6 +2,7 @@
 import { Section, SectionContainer } from "@/components/ui/section";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import { cva, type VariantProps } from "class-variance-authority";
 import {
   Item,
   ItemContent,
@@ -10,108 +11,168 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import type { StepsBlockFields } from "@/lib/block-fields";
+import { cn } from "@/lib/utils";
 
-// "How it works" — three-step enrollment flow.
-// The section keeps its primary-green color block but is scoped `dark` so the
-// token palette resolves to solid, legible values (no opacity wash). Steps are
-// composed from the Item primitive instead of a hand-rolled icon timeline.
-// Content is driven by block data from the CMS; fallback values below are the
-// default hardcoded copy used when no block data is present.
+// ── Section-level variant ──────────────────────────────────────────
+const sectionVariants = cva("", {
+  variants: {
+    variant: {
+      default: "bg-background text-foreground",
+      primary: "bg-primary text-primary-foreground",
+    },
+  },
+  defaultVariants: {
+    variant: "primary",
+  },
+});
 
-type Props = StepsBlockFields & {
-  class?: string;
+// ── Element-level variants that adapt to the section background ────
+// Pattern mirrors button-variants.ts and item.astro
+
+const numberCircleVariants = cva(
+  "w-12 h-12 rounded-full flex justify-center items-center text-2xl font-semibold shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-accent text-foreground",
+        primary: "bg-accent text-accent-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+const stepTitleVariants = cva("text-base font-semibold sm:text-lg", {
+  variants: {
+    variant: {
+      default: "text-foreground",
+      primary: "text-primary dark:text-primary-foreground",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+const stepDescVariants = cva("", {
+  variants: {
+    variant: {
+      default: "text-muted-foreground",
+      primary: "dark:text-primary-foreground text-primary-foreground",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+const chevronVariants = cva("size-14", {
+  variants: {
+    variant: {
+      default: "text-muted-foreground",
+      primary: "text-secondary",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+// ── Props ───────────────────────────────────────────────────────────
+type Props = StepsBlockFields &
+  VariantProps<typeof sectionVariants> & {
+    class?: string;
+  };
+
+const { class: className, variant = "default", ...props } = Astro.props;
+
+const steps = props.steps ?? [];
+const HeadingTag = props.headingLevel || "h2";
+
+const headingLevelClassMap = {
+  h1: "text-4xl sm:text-5xl",
+  h2: "text-3xl sm:text-4xl",
+  h3: "text-2xl sm:text-3xl",
+  h4: "text-xl sm:text-2xl",
 };
-
-const {
-  class: className,
-  title = "Three steps to <em class=\"text-accent\">fluency</em>",
-  description = "From your first conversation to your final exam.",
-  steps = [
-    {
-      title: "Book a placement session",
-      description:
-        "Schedule a free placement session so we can meet you where you are.",
-    },
-    {
-      title: "Choose your plan",
-      description:
-        "Pick the plan that best fits your needs, schedule, and goals.",
-    },
-    {
-      title: "Start your journey",
-      description:
-        "We begin this journey together, one conversation at a time.",
-    },
-  ],
-  buttons = [
-    {
-      label: "Book your free placement",
-      href: "/signup",
-      variant: "primary" as const,
-    },
-  ],
-  headingLevel = "h2",
-} = Astro.props;
-
-const HeadingTag = headingLevel;
 ---
 
-<Section id="how-it-works" class="dark bg-primary text-primary-foreground">
+<Section class={cn(sectionVariants({ variant }), className)}>
   <SectionContainer class="items-center">
     <div class="w-full max-w-2xl text-center">
       <HeadingTag
-        class="font-display text-3xl font-medium leading-[1.15] tracking-[-0.02em] text-balance sm:text-4xl"
-        set:html={title}
+        class:list={cn(
+          headingLevelClassMap[props.headingLevel || "h2"],
+          "font-display font-medium leading-[1.15] tracking-[-0.02em] text-balance",
+        )}
+        set:html={props.title}
       />
-      {description && (
-        <p
-          class="mx-auto mt-4 max-w-md text-primary-foreground leading-relaxed sm:text-lg"
-        >
-          {description}
-        </p>
-      )}
+      {
+        props.description && (
+          <p
+            class:list={cn(
+              "mx-auto mt-4 max-w-md leading-relaxed sm:text-lg",
+              stepDescVariants({ variant }),
+            )}
+          >
+            {props.description}
+          </p>
+        )
+      }
 
       <ItemGroup class="mt-10 text-left sm:mt-12">
         {
           steps.map((step, index) => (
-            <Item variant="muted">
-              <div class="w-10 flex flex-col items-center gap-2">
-              <h4 class="text-xl text-accent-foreground w-6 h-6 rounded-full bg-accent flex justify-center items-center">
-                {index + 1}
-              </h4>
+            <Fragment key={index}>
+              <Item variant="muted">
+                <div class="w-10 flex flex-col items-center gap-2">
+                  <h4 class={numberCircleVariants({ variant })}>{index + 1}</h4>
+                </div>
+                <ItemContent>
+                  <ItemTitle class={stepTitleVariants({ variant })}>
+                    {step.title}
+                  </ItemTitle>
+                  <ItemDescription class={stepDescVariants({ variant })}>
+                    {step.description}
+                  </ItemDescription>
+                </ItemContent>
+              </Item>
               {index < steps.length - 1 && (
-                <Icon name="chevron-down" class="size-7" />
+                <div class="w-full flex items-center justify-center">
+                  <Icon
+                    name={(props.arrow || "arrow") + "-down"}
+                    class={chevronVariants({ variant })}
+                  />
+                </div>
               )}
-              </div>
-              <ItemContent>
-                <ItemTitle class="text-base font-semibold sm:text-lg">
-                  {step.title}
-                </ItemTitle>
-                <ItemDescription class="text-muted-foreground">{step.description}</ItemDescription>
-              </ItemContent>
-            </Item>
+            </Fragment>
           ))
         }
       </ItemGroup>
 
-      {buttons.length > 0 && (
-        <div class="mt-10">
-          {buttons.map((btn) => (
-            <Button
-              as="a"
-              href={btn.href}
-              size="lg"
-              class="h-12 bg-accent px-6 text-base text-accent-foreground hover:bg-accent hover:brightness-95"
-            >
-              {btn.label}
-              <Icon
-                name="arrow-right"
-                class="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5"
-              />
-            </Button>
-          ))}
-        </div>
-      )}
+      {
+        props?.buttons && (
+          <div class="mt-10">
+            {props.buttons?.map((btn) => (
+              <Button
+                as="a"
+                href={btn.href}
+                size="lg"
+                variant={btn.variant === "primary" ? "default" : btn.variant}
+                class="h-12 px-6 text-base"
+              >
+                {btn.label}
+                <Icon
+                  name="arrow-right"
+                  class="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5"
+                />
+              </Button>
+            ))}
+          </div>
+        )
+      }
     </div>
   </SectionContainer>
 </Section>

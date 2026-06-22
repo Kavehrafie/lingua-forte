@@ -3,57 +3,92 @@ import { getPublishedPageByPath } from "@/lib/server/page";
 import Layout from "@/layouts/Layout.astro";
 import HeroBlock from "@/components/blocks/hero.astro";
 import StepsBlock from "@/components/blocks/steps.astro";
-import {type HeroBlockFields, type StepsBlockFields} from "@/lib/block-fields";
-import Calder1 from "@/assets/calder.svg"
-import Calder2 from "@/assets/calder-footer.svg"
-
+import {
+  type HeroBlockFields,
+  type StepsBlockFields,
+} from "@/lib/block-fields";
 export const prerender = false;
-const { path } = Astro.params;
+const path = Astro.params.path || "/";
 
-if (!path) {
-  throw new Error("Path parameter is required");
-}
 const page = await getPublishedPageByPath(path);
-const imageMap = {
-  "calder-1": {
-    src: Calder1,
-    alt: "Alexander Calder's mobile sculpture",
+
+// ── Block type → field type map ──
+type BlockFieldsMap = {
+  hero: HeroBlockFields;
+  steps: StepsBlockFields;
+};
+type BlockType = keyof BlockFieldsMap;
+
+// ── Block registry (component + prop builder) ──
+const blockRegistry = {
+  hero: {
+    component: HeroBlock,
+    props: (data: HeroBlockFields) =>
+      ({
+        title: data.heading || "",
+        subtitle: data.subheading || "",
+        description: data.text || "",
+        image: data.image || undefined,
+        buttons:
+          data.buttons?.map((btn) => ({
+            label: btn.label,
+            href: btn.href,
+            variant: (btn.variant === "primary" ? "default" : btn.variant) as
+              | "default"
+              | "secondary"
+              | "outline"
+              | "ghost",
+          })) || [],
+        layout: data.layout,
+        width: data.width,
+        imagePosition: data.imagePosition,
+      }) as const,
   },
-  "calder-2": {
-    src: Calder2,
-    alt: "Alexander Calder's mobile sculpture",
+  steps: {
+    component: StepsBlock,
+    props: (data: StepsBlockFields) =>
+      ({
+        title: data.title || "",
+        description: data.description || "",
+        steps:
+          data.steps.map((step) => ({
+            title: step.title,
+            description: step.description,
+          })) || [],
+        buttons:
+          data.buttons?.map((btn) => ({
+            label: btn.label,
+            href: btn.href,
+            variant: btn.variant,
+          })) || [],
+        arrow: data.arrow,
+        headingLevel: data.headingLevel || "h2",
+        variant: data.variant,
+      }) as const,
   },
-}
+} satisfies Record<
+  BlockType,
+  { component: any; props: (data: any) => Record<string, any> }
+>;
 ---
 
 <Layout>
   {
-    page?.blocks.map((block, index) => {
-      if (block.type === "hero") {
-        const data = block.content as HeroBlockFields;
+    page?.blocks.map((block) => {
+      const type = block.type as BlockType;
+
+      if (type === "hero")
         return (
           <HeroBlock
-            title={data.heading || ""}
-            image={data.image ? {
-              component: imageMap[data?.image].src,
-              alt: imageMap[data?.image]?.alt,
-            } : undefined}
-            subtitle={data.subheading || ""}
-            description={data.text || ""}
-            buttons={data.buttons?.map((btn) => ({
-              label: btn.label,
-              href: btn.href,
-              variant: btn.variant === "primary" ? "default" : btn.variant,
-            })) || []}
-            variant={data.variant}
+            {...blockRegistry.hero.props(block.content as HeroBlockFields)}
           />
         );
-      }
-      if (block.type === "steps") {
-        const data = block.content as StepsBlockFields;
-        return <StepsBlock {...data} />;
-      }
-      // Handle other block types here...
+      if (type === "steps")
+        return (
+          <StepsBlock
+            {...blockRegistry.steps.props(block.content as StepsBlockFields)}
+          />
+        );
     })
   }
 </Layout>

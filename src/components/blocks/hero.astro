@@ -1,22 +1,21 @@
 ---
 import type { ImageMetadata } from "astro";
 import { Image } from "astro:assets";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Section, SectionContainer } from "@/components/ui/section";
+import { Section } from "@/components/ui/section";
+import Calder1 from "@/assets/calder.svg";
+import Calder2 from "@/assets/calder-footer.svg";
+import CalderPattern1 from "@/assets/calder-pattern.svg";
 
 type ImageProp = {
   src: ImageMetadata;
   alt: string;
 };
 
-type SvgProp = {
-  component: import("astro/types").SvgComponent;
-  alt: string;
-};
-
-type Props = {
+type Props = VariantProps<typeof containerVariants> & {
   class?: string;
   title: string;
   description: string;
@@ -26,9 +25,35 @@ type Props = {
     href: string;
     variant?: "default" | "outline" | "secondary" | "ghost";
   }[];
-  image: ImageProp | SvgProp | undefined;
-  variant?: "flex" | "1-3" | "3-1";
+  image: ImageProp | string | undefined;
 };
+
+const containerVariants = cva("mx-auto grid w-full items-start gap-12", {
+  variants: {
+    layout: {
+      flex: "lg:flex",
+      "1-3":
+        "lg:grid-cols-5 lg:gap-16 [&>:first-child]:lg:col-span-2 [&>:last-child]:lg:col-span-3",
+      "3-1":
+        "lg:grid-cols-5 lg:gap-16 [&>:first-child]:lg:col-span-3 [&>:last-child]:lg:col-span-2",
+      "1-1": "lg:grid-cols-2 lg:gap-16",
+    },
+    width: {
+      default: "max-w-7xl px-4",
+      narrow: "max-w-5xl px-4",
+      wide: "max-w-[1920px] px-8",
+    },
+    imagePosition: {
+      left: "",
+      right: "[&>:first-child]:order-2 [&>:last-child]:order-1",
+    },
+  },
+  defaultVariants: {
+    layout: "1-3",
+    width: "default",
+    imagePosition: "left",
+  },
+});
 
 const {
   class: className,
@@ -37,26 +62,33 @@ const {
   subtitle,
   buttons,
   image,
+  layout,
+  width,
+  imagePosition,
 }: Props = Astro.props;
 
-const isImage = image !== undefined && "src" in image;
-const imageMeta: ImageProp | null = isImage ? image : null;
-const svgComp = image !== undefined && "component" in image ? image.component : null;
+const imageMeta: ImageProp | null =
+  image !== undefined && typeof image !== "string"
+    ? (image as ImageProp)
+    : null;
 
-// Editorial type-led hero: text column on the left, feature image on the right.
-// The headline carries the weight. Newsreader italic on the accent word
-// does the emphasis; no decorative markup needed.
+const svgMap: Record<string, typeof Calder1> = {
+  "calder-1": Calder1,
+  "calder-2": Calder2,
+  "calder-pattern-1": CalderPattern1,
+};
+const SvgComponent = typeof image === "string" ? svgMap[image] : null;
 ---
 
 <Section class={cn("parallax-hero", className)}>
-  <SectionContainer>
-    <div
-      class="grid items-start gap-12 lg:grid-cols-5 lg:gap-16"
-      style="place-items: center;"
-    >
-      <!-- Image column -->
-      <div class="lg:col-span-2">
-        {imageMeta && (
+  <div
+    class={cn(containerVariants({ layout, width, imagePosition }))}
+    style="place-items: center;"
+  >
+    <!-- Image column -->
+    <div>
+      {
+        imageMeta && (
           <Image
             src={imageMeta.src}
             alt={imageMeta.alt}
@@ -64,79 +96,81 @@ const svgComp = image !== undefined && "component" in image ? image.component : 
             widths={[640, 960, 1280, 1920]}
             loading="eager"
           />
-        )}
-        {svgComp && <svgComp class="w-full parallax-hero-layer" />}
-      </div>
-      <!-- Text column -->
-      <div class="lg:col-span-3">
-        {subtitle && (
-          <p
-            class="font-sans text-xs font-semibold tracking-[0.2em] text-accent uppercase"
-          >
+        )
+      }
+      {SvgComponent && <SvgComponent class="w-full parallax-hero-layer" />}
+    </div>
+    <!-- Text column -->
+    <div>
+      {
+        subtitle && (
+          <p class="font-sans text-xs font-semibold tracking-[0.2em] text-accent uppercase">
             {subtitle}
           </p>
-        )}
-        <h1
-          class="text-foreground font-display mt-6 text-4xl leading-[1.1] font-medium tracking-[-0.02em] text-balance sm:text-5xl lg:text-6xl"
-          set:html={title}
-        />
-        <p
-          class="mt-6 max-w-[58ch] text-base leading-relaxed text-foreground/80 sm:text-lg"
-          set:html={description}
-        />
+        )
+      }
+      <h1
+        class="text-foreground font-display mt-6 text-4xl leading-[1.1] font-medium tracking-[-0.02em] text-balance sm:text-5xl lg:text-6xl"
+        set:html={title}
+      />
+      <p
+        class="mt-6 max-w-[58ch] text-base leading-relaxed text-foreground/80 sm:text-lg"
+        set:html={description}
+      />
 
-        <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
-          {
-            buttons.map(({ href, label, ...button }, index) => (
-              <Button
-                as="a"
-                href={href}
-                size="lg"
-                variant={
-                  button.variant ?? (index === 0 ? "default" : "secondary")
-                }
-                class="h-12 px-6 text-base"
-                {...button}
-              >
-                {label}
-                {index === 0 && (
-                  <Icon
-                    name="arrow-right"
-                    class="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5"
-                  />
-                )}
-              </Button>
-            ))
-          }
-        </div>
+      <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
+        {
+          buttons.map(({ href, label, ...button }, index) => (
+            <Button
+              as="a"
+              href={href}
+              size="lg"
+              variant={
+                button.variant ?? (index === 0 ? "default" : "secondary")
+              }
+              class="h-12 px-6 text-base"
+              {...button}
+            >
+              {label}
+              {index === 0 && (
+                <Icon
+                  name="arrow-right"
+                  class="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5"
+                />
+              )}
+            </Button>
+          ))
+        }
       </div>
     </div>
-  </SectionContainer>
+  </div>
 </Section>
 
 <style>
-  @property --parallax-y {
-    syntax: "<percentage>";
-    inherits: true;
-    initial-value: 0%;
-  }
-
-  .parallax-hero {
-    animation: hero-parallax linear both;
-    animation-timeline: view();
-    animation-range: exit;
-  }
-
-  @keyframes hero-parallax {
-    from {
-      --parallax-y: 0%;
+  @supports (animation-timeline: view()) {
+    @property --parallax-y {
+      syntax: "<percentage>";
+      inherits: true;
+      initial-value: 0%;
     }
-    to {
-      --parallax-y: 40%;
-    }
-  }
 
-  .parallax-hero-layer {
-    transform: translateY(var(--parallax-y));
+    .parallax-hero {
+      animation: hero-parallax linear both;
+      animation-timeline: view();
+      animation-range: exit;
+    }
+
+    @keyframes hero-parallax {
+      from {
+        --parallax-y: 0%;
+      }
+      to {
+        --parallax-y: 40%;
+      }
+    }
+
+    .parallax-hero-layer {
+      transform: translateY(var(--parallax-y));
+    }
   }
 </style>

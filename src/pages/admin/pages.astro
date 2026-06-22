@@ -1,0 +1,106 @@
+---
+import Layout from "@/layouts/AdminLayout.astro";
+import { listPages } from "@/lib/server/page";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+
+export const prerender = false;
+
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+const pages = await listPages();
+---
+
+<Layout {user}>
+  <div class="mx-auto w-full max-w-3xl py-6">
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Pages</h1>
+        <p class="text-sm text-muted-foreground">
+          Create pages and manage their content blocks.
+        </p>
+      </div>
+      <Button as="a" href="/admin/page/create" class="gap-2">
+        <Icon name="plus" />
+        New page
+      </Button>
+    </div>
+
+    {
+      pages.length === 0 ? (
+        <div class="rounded-lg border border-dashed px-4 py-12 text-center">
+          <p class="text-sm text-muted-foreground">No pages yet.</p>
+          <a
+            href="/admin/page/create"
+            class="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+          >
+            Create your first page
+          </a>
+        </div>
+      ) : (
+        <ul class="divide-y rounded-lg border">
+          {pages.map((page) => (
+            <li>
+              <a
+                href={`/admin/page/${page.id}`}
+                class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/20"
+              >
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="truncate font-medium">{page.title}</span>
+                    {!page.isPublished && (
+                      <span class="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                        Draft
+                      </span>
+                    )}
+                  </div>
+                  <div class="truncate text-sm text-muted-foreground">
+                    {page.path}
+                  </div>
+                </div>
+                <Button variant={"destructive"} data-block-id={page.id}>
+                  <Icon name="trash" />
+                </Button>
+                <Icon name="chevron-right" class="text-muted-foreground" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</Layout>
+
+<script>
+  import { actions } from "astro:actions";
+  // Add delete functionality to the delete buttons
+  document.querySelectorAll("button[data-block-id]").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const pageId = button.getAttribute("data-block-id");
+      if (pageId && confirm("Are you sure you want to delete this page?")) {
+        try {
+          const { error } = await actions.deletePage({ id: pageId });
+          if (error) {
+            console.error("Error deleting page:", error);
+            alert("An error occurred while deleting the page.");
+          } else {
+            // Remove the deleted page from the list
+            const listItem = button.closest("li");
+            if (listItem) {
+              listItem.remove();
+            }
+          }
+        } catch (error) {
+          console.error("Error deleting page:", error);
+          alert("An error occurred while deleting the page.");
+        }
+      }
+    });
+  });
+</script>
