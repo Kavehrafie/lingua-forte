@@ -13,7 +13,7 @@ import {
 import { getDb } from "@/lib/server/db";
 import { page, pageBlock } from "@/lib/server/db/schema";
 import { getBlockById, nextBlockPosition } from "@/lib/server/page";
-import { heroBlockFields } from "@/lib/block-fields";
+import { heroBlockFields, stepsBlockFields } from "@/lib/block-fields";
 
 export const server = {
   createPage: defineAction({
@@ -39,6 +39,7 @@ export const server = {
       )
         .then(([created]) => ({ id: created.id }))
         .catch((err: unknown) => {
+          if (err instanceof ActionError) throw err;
           const message = err instanceof Error ? err.message : String(err);
           if (message.includes("UNIQUE constraint failed")) {
             throw new ActionError({
@@ -46,7 +47,12 @@ export const server = {
               message: "A page with this path already exists.",
             });
           }
-          throw err;
+          // Keep the real cause server-side; surface a safe message to the client.
+          console.error("[createPage] database error:", err);
+          throw new ActionError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Could not create the page. Please try again.",
+          });
         });
     },
   }),
@@ -159,6 +165,8 @@ export const server = {
           try {
             if (existing.type === "hero") {
               contentObj = heroBlockFields.parse(JSON.parse(content));
+            } else if (existing.type === "steps") {
+              contentObj = stepsBlockFields.parse(JSON.parse(content));
             }
           } catch {
             throw new ActionError({

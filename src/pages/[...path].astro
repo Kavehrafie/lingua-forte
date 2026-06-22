@@ -1,0 +1,59 @@
+---
+import { getPublishedPageByPath } from "@/lib/server/page";
+import Layout from "@/layouts/Layout.astro";
+import HeroBlock from "@/components/blocks/hero.astro";
+import StepsBlock from "@/components/blocks/steps.astro";
+import {type HeroBlockFields, type StepsBlockFields} from "@/lib/block-fields";
+import Calder1 from "@/assets/calder.svg"
+import Calder2 from "@/assets/calder-footer.svg"
+
+export const prerender = false;
+const { path } = Astro.params;
+
+if (!path) {
+  throw new Error("Path parameter is required");
+}
+const page = await getPublishedPageByPath(path);
+const imageMap = {
+  "calder-1": {
+    src: Calder1,
+    alt: "Alexander Calder's mobile sculpture",
+  },
+  "calder-2": {
+    src: Calder2,
+    alt: "Alexander Calder's mobile sculpture",
+  },
+}
+---
+
+<Layout>
+  {
+    page?.blocks.map((block, index) => {
+      if (block.type === "hero") {
+        const data = block.content as HeroBlockFields;
+        return (
+          <HeroBlock
+            title={data.heading || ""}
+            image={data.image ? {
+              component: imageMap[data?.image].src,
+              alt: imageMap[data?.image]?.alt,
+            } : undefined}
+            subtitle={data.subheading || ""}
+            description={data.text || ""}
+            buttons={data.buttons?.map((btn) => ({
+              label: btn.label,
+              href: btn.href,
+              variant: btn.variant === "primary" ? "default" : btn.variant,
+            })) || []}
+            variant={data.variant}
+          />
+        );
+      }
+      if (block.type === "steps") {
+        const data = block.content as StepsBlockFields;
+        return <StepsBlock {...data} />;
+      }
+      // Handle other block types here...
+    })
+  }
+</Layout>

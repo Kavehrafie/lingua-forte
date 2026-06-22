@@ -17,16 +17,28 @@ if (result && !result.error) {
 }
 
 const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+// Any non-input error (CONFLICT, DB failure, etc.). Narrowed once so we can
+// branch on its code without re-checking on every access.
+const nonInputError =
+  result?.error && !isInputError(result.error) ? result.error : null;
 const pathConflict =
-  result?.error &&
-  !isInputError(result.error) &&
-  result.error.code === "CONFLICT"
-    ? result.error.message
+  nonInputError && nonInputError.code === "CONFLICT"
+    ? nonInputError.message
+    : null;
+// Catch-all for everything else (e.g. INTERNAL_SERVER_ERROR from a DB failure).
+// Without this, non-CONFLICT errors fall through and the form renders blank.
+const genericError =
+  nonInputError && nonInputError.code !== "CONFLICT"
+    ? nonInputError.message || "Something went wrong creating the page. Please try again."
     : null;
 ---
 
 <Layout {user}>
   <div class="mx-auto w-full max-w-3xl py-6">
-    <PageForm fieldErrors={fieldErrors} pathConflict={pathConflict} />
+    <PageForm
+      fieldErrors={fieldErrors}
+      pathConflict={pathConflict}
+      genericError={genericError}
+    />
   </div>
 </Layout>

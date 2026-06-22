@@ -1,62 +1,117 @@
 ---
 import { Section, SectionContainer } from "@/components/ui/section";
+import { Icon } from "@/components/ui/icon";
+import { Button } from "@/components/ui/button";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/components/ui/item";
+import type { StepsBlockFields } from "@/lib/block-fields";
 
-type Step = {
-  title: string;
-  description: string;
+// "How it works" — three-step enrollment flow.
+// The section keeps its primary-green color block but is scoped `dark` so the
+// token palette resolves to solid, legible values (no opacity wash). Steps are
+// composed from the Item primitive instead of a hand-rolled icon timeline.
+// Content is driven by block data from the CMS; fallback values below are the
+// default hardcoded copy used when no block data is present.
+
+type Props = StepsBlockFields & {
+  class?: string;
 };
 
-// "Three Steps to Fluency" intake flow. Vertical numbered list on every
-// breakpoint (mobile-first), so the layout never collapses badly. The large
-// display-serif numerals carry the visual rhythm; no connector lines.
-const steps: Step[] = [
-  {
-    title: "Book a placement session",
-    description:
-      "Schedule a free placement session so we can meet you where you are.",
-  },
-  {
-    title: "Choose your plan",
-    description:
-      "Pick the plan that best fits your needs, schedule, and goals.",
-  },
-  {
-    title: "Start your journey",
-    description:
-      "We begin this journey together, one conversation at a time.",
-  },
-];
+const {
+  class: className,
+  title = "Three steps to <em class=\"text-accent\">fluency</em>",
+  description = "From your first conversation to your final exam.",
+  steps = [
+    {
+      title: "Book a placement session",
+      description:
+        "Schedule a free placement session so we can meet you where you are.",
+    },
+    {
+      title: "Choose your plan",
+      description:
+        "Pick the plan that best fits your needs, schedule, and goals.",
+    },
+    {
+      title: "Start your journey",
+      description:
+        "We begin this journey together, one conversation at a time.",
+    },
+  ],
+  buttons = [
+    {
+      label: "Book your free placement",
+      href: "/signup",
+      variant: "primary" as const,
+    },
+  ],
+  headingLevel = "h2",
+} = Astro.props;
+
+const HeadingTag = headingLevel;
 ---
 
-<Section id="how-it-works" class="bg-primary">
+<Section id="how-it-works" class="dark bg-primary text-primary-foreground">
   <SectionContainer class="items-center">
-    <div class="w-full max-w-3xl">
-      <h2
-        class="font-display text-primary-foreground text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl"
-      >
-        Three Steps to Fluency
-      </h2>
-      <ol class="mt-10 flex flex-col sm:mt-14">
+    <div class="w-full max-w-2xl text-center">
+      <HeadingTag
+        class="font-display text-3xl font-medium leading-[1.15] tracking-[-0.02em] text-balance sm:text-4xl"
+        set:html={title}
+      />
+      {description && (
+        <p
+          class="mx-auto mt-4 max-w-md text-primary-foreground leading-relaxed sm:text-lg"
+        >
+          {description}
+        </p>
+      )}
+
+      <ItemGroup class="mt-10 text-left sm:mt-12">
         {
           steps.map((step, index) => (
-            <li
-              class="flex gap-6 border-t border-white/15 py-6 first:border-t-0 first:pt-0 sm:gap-8 sm:py-8"
-            >
-              <div class="font-display text-accent text-5xl leading-none font-semibold tabular-nums sm:text-6xl">
+            <Item variant="muted">
+              <div class="w-10 flex flex-col items-center gap-2">
+              <h4 class="text-xl text-accent-foreground w-6 h-6 rounded-full bg-accent flex justify-center items-center">
                 {index + 1}
+              </h4>
+              {index < steps.length - 1 && (
+                <Icon name="chevron-down" class="size-7" />
+              )}
               </div>
-              <div class="flex flex-col gap-2 pt-1.5 sm:pt-2">
-                <h3 class="text-xl font-semibold text-primary-foreground sm:text-2xl">
+              <ItemContent>
+                <ItemTitle class="text-base font-semibold sm:text-lg">
                   {step.title}
-                </h3>
-                <p class="text-primary-foreground/75 leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-            </li>
+                </ItemTitle>
+                <ItemDescription class="text-muted-foreground">{step.description}</ItemDescription>
+              </ItemContent>
+            </Item>
           ))
         }
-      </ol>
+      </ItemGroup>
+
+      {buttons.length > 0 && (
+        <div class="mt-10">
+          {buttons.map((btn) => (
+            <Button
+              as="a"
+              href={btn.href}
+              size="lg"
+              class="h-12 bg-accent px-6 text-base text-accent-foreground hover:bg-accent hover:brightness-95"
+            >
+              {btn.label}
+              <Icon
+                name="arrow-right"
+                class="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5"
+              />
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   </SectionContainer>
 </Section>

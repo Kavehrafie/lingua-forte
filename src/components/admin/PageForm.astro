@@ -31,12 +31,16 @@ type Props = HTMLAttributes<"div"> & {
   page?: Page;
   fieldErrors?: Record<string, string[]>;
   pathConflict?: string | null;
+  // Form-level error for anything that isn't a field/validation error
+  // (e.g. a database failure). Shown as a banner above the fields.
+  genericError?: string | null;
 };
 
 const {
   page,
   fieldErrors = {},
   pathConflict = null,
+  genericError = null,
   ...rest
 } = Astro.props;
 
@@ -72,6 +76,14 @@ const pathInvalid = Boolean(fieldErrors.path) || Boolean(pathConflict);
       </CardHeader>
 
       <CardContent>
+        {genericError && (
+          <div
+            role="alert"
+            class="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+          >
+            {genericError}
+          </div>
+        )}
         <FieldGroup>
           <Field data-invalid={fieldErrors.title ? "true" : undefined}>
             <FieldLabel for="title">Title</FieldLabel>

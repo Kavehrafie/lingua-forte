@@ -15,6 +15,18 @@ export const getPageByID = async (id: string) => {
   });
 };
 
+export const getPublishedPageByPath = async (path: string) => {
+  const db = getDb(env.db);
+  return db.query.page.findFirst({
+    where: (page, { eq, and }) => and(eq(page.path, path), eq(page.isPublished, true)),
+    with: {
+      blocks: {
+        orderBy: (pageBlock, { asc }) => asc(pageBlock.position),
+      },
+    },
+  });
+};
+
 export const getBlockById = async (id: string) => {
   const db = getDb(env.db);
   return db.query.pageBlock.findFirst({
