@@ -1,0 +1,114 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { blockTypes } from "@/actions/schema";
+import { actions } from "astro:actions";
+
+type Page = NonNullable<
+  Awaited<ReturnType<typeof import("@/lib/server/page").getPageByID>>
+>;
+
+type Props = HTMLAttributes<"div"> & {
+  page: Page;
+};
+
+const { page, ...rest } = Astro.props;
+
+const blockTypeLabel: Record<string, string> = {
+  hero: "Hero",
+  steps: "Steps",
+  "signup-form": "Signup form",
+  faq: "FAQ",
+  markdown: "Markdown",
+};
+---
+
+<div {...rest}>
+  <Card>
+    <CardHeader>
+      <CardTitle>Blocks</CardTitle>
+      <CardDescription>
+        Drag to reorder. Click a block to edit its content.
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent>
+      {page.blocks.length === 0 ? (
+        <p class="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+          No blocks yet. Add the first one below.
+        </p>
+      ) : (
+        <ul
+          id="blocks-list"
+          data-page-id={page.id}
+          class="flex flex-col gap-2"
+        >
+          {page.blocks.map((block) => (
+            <li
+              data-block-id={block.id}
+              class="group flex items-center gap-3 rounded-lg border border-border px-3 py-2.5 transition-colors hover:border-input hover:bg-accent/20"
+            >
+              <button
+                type="button"
+                data-drag-handle
+                aria-label="Drag to reorder"
+                class="cursor-grab text-muted-foreground touch-none active:cursor-grabbing"
+              >
+                <Icon name="grip-vertical" />
+              </button>
+
+              <a
+                href={`/admin/page/${page.id}/blocks/${block.id}`}
+                class="flex flex-1 items-center gap-2 text-sm"
+              >
+                <span class="font-medium">
+                  {blockTypeLabel[block.type] ?? block.type}
+                </span>
+                {!block.isVisible && (
+                  <span class="text-xs text-muted-foreground">(hidden)</span>
+                )}
+              </a>
+
+              <a
+                href={`/admin/page/${page.id}/blocks/${block.id}`}
+                class="text-muted-foreground hover:text-foreground"
+                aria-label="Edit block"
+              >
+                <Icon name="chevron-right" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </CardContent>
+
+    <CardContent>
+      <Form method="post" action={actions.addBlock} class="flex flex-row gap-2">
+        <input type="hidden" name="pageId" value={page.id} />
+        <div class="flex-1">
+          <NativeSelect name="type" class="w-full" aria-label="Block type">
+            {blockTypes.map((type) => (
+              <NativeSelectOption value={type}>
+                {blockTypeLabel[type] ?? type}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </div>
+        <Button type="submit" variant="outline" class="gap-2">
+          <Icon name="plus" />
+          Add
+        </Button>
+      </Form>
+    </CardContent>
+  </Card>
+</div>

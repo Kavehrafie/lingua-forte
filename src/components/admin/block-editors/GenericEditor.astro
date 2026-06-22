@@ -1,0 +1,116 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { actions } from "astro:actions";
+
+type Block = NonNullable<
+  Awaited<ReturnType<typeof import("@/lib/server/page").getBlockById>>
+>;
+
+type Props = HTMLAttributes<"div"> & {
+  block: Block;
+  pageId: string;
+  error?: string | null;
+};
+
+const { block, pageId, error = null, ...rest } = Astro.props;
+const contentStr = block.content ? JSON.stringify(block.content, null, 2) : "";
+
+const typeLabel: Record<string, string> = {
+  hero: "Hero",
+  steps: "Steps",
+  "signup-form": "Signup form",
+  faq: "FAQ",
+  markdown: "Markdown",
+};
+const label = typeLabel[block.type] ?? block.type;
+---
+
+<div {...rest}>
+  <a
+    href={`/admin/page/${pageId}/blocks`}
+    class="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+  >
+    <Icon name="arrow-left" />
+    Back to blocks
+  </a>
+
+  <Form method="post" action={actions.updateBlock}>
+    <input type="hidden" name="id" value={block.id} />
+
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit {label} block</CardTitle>
+        <CardDescription>
+          Raw JSON editor. A type-specific editor will replace this later.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        <FieldGroup>
+          <Field>
+            <FieldLabel for="content">Content (JSON)</FieldLabel>
+            <Textarea
+              id="content"
+              name="content"
+              rows={12}
+              class="font-mono text-sm"
+              placeholder="{}"
+              value={contentStr}
+            />
+            <FieldDescription>
+              Must be valid JSON. Saved as the block's content field.
+            </FieldDescription>
+            {error && <FieldError>{error}</FieldError>}
+          </Field>
+
+          <Field>
+            <label class="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                name="isVisible"
+                value="true"
+                checked={block.isVisible}
+                class="size-4 rounded border-input"
+              />
+              Visible on published page
+            </label>
+          </Field>
+        </FieldGroup>
+      </CardContent>
+
+      <CardContent>
+        <Button type="submit">Save block</Button>
+      </CardContent>
+    </Card>
+  </Form>
+
+  <Form method="post" action={actions.deleteBlock} class="mt-4">
+    <input type="hidden" name="id" value={block.id} />
+    <Button
+      type="submit"
+      variant="outline"
+      class="gap-2 text-destructive hover:text-destructive"
+    >
+      <Icon name="trash" />
+      Delete block
+    </Button>
+  </Form>
+</div>

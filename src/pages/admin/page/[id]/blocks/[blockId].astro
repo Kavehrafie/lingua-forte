@@ -1,0 +1,69 @@
+---
+import Layout from "@/layouts/AdminLayout.astro";
+import { actions, isInputError } from "astro:actions";
+import { getPageByID, getBlockById } from "@/lib/server/page";
+import MarkdownEditor from "@/components/admin/block-editors/MarkdownEditor.astro";
+import GenericEditor from "@/components/admin/block-editors/GenericEditor.astro";
+
+export const prerender = false;
+
+const { id, blockId } = Astro.params;
+const { user } = Astro.locals;
+
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+if (!id || !blockId) {
+  return Astro.redirect("/admin");
+}
+
+const page = await getPageByID(id);
+if (!page) {
+  return Astro.redirect("/admin");
+}
+
+const block = await getBlockById(blockId);
+// Guard against editing a block that doesn't belong to this page.
+if (!block || block.pageId !== page.id) {
+  return Astro.redirect(`/admin/page/${page.id}/blocks`);
+}
+
+// On successful save or delete, return to the blocks list.
+const updateBlockResult = Astro.getActionResult(actions.updateBlock);
+if (updateBlockResult && !updateBlockResult.error && updateBlockResult.data) {
+  return Astro.redirect(
+    `/admin/page/${updateBlockResult.data.pageId}/blocks`,
+  );
+}
+
+const deleteBlockResult = Astro.getActionResult(actions.deleteBlock);
+if (deleteBlockResult && !deleteBlockResult.error && deleteBlockResult.data) {
+  return Astro.redirect(
+    `/admin/page/${deleteBlockResult.data.pageId}/blocks`,
+  );
+}
+
+const blockEditorError =
+  updateBlockResult?.error && !isInputError(updateBlockResult.error)
+    ? updateBlockResult.error.message
+    : null;
+---
+
+<Layout {user}>
+  <div class="mx-auto w-full max-w-3xl py-6">
+    {block.type === "markdown" ? (
+      <MarkdownEditor
+        block={block}
+        pageId={page.id}
+        error={blockEditorError}
+      />
+    ) : (
+      <GenericEditor
+        block={block}
+        pageId={page.id}
+        error={blockEditorError}
+      />
+    )}
+  </div>
+</Layout>

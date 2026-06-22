@@ -1,20 +1,28 @@
 ---
 import Layout from "@/layouts/AdminLayout.astro";
-import PageForm from "@/components/admin/PageForm.astro";
 import { actions, isInputError } from "astro:actions";
+import { getPageByID } from "@/lib/server/page";
+import PageForm from "@/components/admin/PageForm.astro";
 
 export const prerender = false;
 
+const { id } = Astro.params;
 const { user } = Astro.locals;
+
 if (!user) {
   return Astro.redirect("/login");
 }
 
-const result = Astro.getActionResult(actions.createPage);
-
-if (result && !result.error) {
-  return Astro.redirect(`/admin/page/${result.data.id}`);
+if (!id) {
+  return Astro.redirect("/admin");
 }
+
+const page = await getPageByID(id);
+if (!page) {
+  return Astro.redirect("/admin");
+}
+
+const result = Astro.getActionResult(actions.updatePage);
 
 const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
 const pathConflict =
@@ -27,6 +35,10 @@ const pathConflict =
 
 <Layout {user}>
   <div class="mx-auto w-full max-w-3xl py-6">
-    <PageForm fieldErrors={fieldErrors} pathConflict={pathConflict} />
+    <PageForm
+      page={page}
+      fieldErrors={fieldErrors}
+      pathConflict={pathConflict}
+    />
   </div>
 </Layout>

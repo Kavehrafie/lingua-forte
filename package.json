@@ -39,12 +39,14 @@
 		"drizzle-orm": "^0.45.2",
 		"lucide-static": "^1.21.0",
 		"simple-icons": "^16.24.0",
+		"sortablejs": "^1.15.7",
 		"tailwind-merge": "^3.6.0",
 		"tailwindcss": "^4.3.1"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.9",
 		"@types/node": "^25.9.4",
+		"@types/sortablejs": "^1.15.9",
 		"drizzle-kit": "^0.31.10",
 		"shadcn": "^4.11.0",
 		"tsx": "^4.22.4",

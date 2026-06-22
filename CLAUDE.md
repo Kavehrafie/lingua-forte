@@ -72,6 +72,18 @@ These are real, easy to trip on:
 2. **`package.json` scripts still use `wrangler pages dev/deploy`** even though the project migrated to Workers. `bun run preview` and `bun run deploy` will fail or do the wrong thing until updated to `wrangler dev` / `wrangler deploy`.
 3. **`README.md` is the default Astro starter template**, no project-specific content.
 
+## Implementation gotchas
+
+### Scroll-driven parallax on a footer (`src/components/blocks/footer-3.astro`)
+
+The footer uses CSS scroll-driven animations (`animation-timeline: view()`) to parallax the Calder SVG behind the footer content. Three things trip this up:
+
+1. **`animation-range` must be reachable.** For a bottom-of-page element you can only scroll from `entry 0%` (footer top enters viewport) to ~`contain 0%` (footer fully visible). Ranges like `entry 0% contain 100%` or `entry 0% exit 100%` never reach their endpoint because the page ends first, so the animation stalls partway. Use `animation-range: entry` (= `entry 0% entry 100%`) — that maps the animation onto the scroll range you can actually reach.
+2. **`translateY(<percentage>)` is relative to the SVG's own height, not the footer's.** With `height: 100% !important` on `.parallax-layer-back` they match, but `±6%` is only ~12% of footer height of total travel — too subtle. `±20%` reads as parallax.
+3. **Buffer the layer height or you get gaps.** The SVG is anchored `top: 0; bottom: 0; height: 100%`, so translating it inside `overflow: hidden` reveals empty footer background on the opposite edge. Make the layer taller than its container (e.g. `height: 140%`, shift `top` to center) so it has room to move within the mask.
+
+Scroll-driven animations are Chrome/Edge 115+, Safari 26+, Firefox 135+ (sometimes flagged). Outside those, the parallax silently no-ops.
+
 ## Design intent
 
 The site currently uses generic full.dev blocks as a placeholder. The goal is to give Lingua Forte a distinct visual identity (not the default shadcn/full.dev look). The signup form for classes and tutoring is the conversion target — design decisions should funnel toward it. When doing design work, invoke the `design-taste-frontend` skill first; it carries the brief-inference and pre-flight rules that govern this project's aesthetic.

@@ -28,6 +28,7 @@ export const createPageInput = z.object({
 });
 
 export const updatePageInput = z.object({
+  id: z.string().uuid(),
   title: z.string().min(4, "Title is required"),
   path: z
     .string()
@@ -52,11 +53,50 @@ export const updatePageInput = z.object({
     .refine((val) => val.length >= 1, "Path must not be empty"),
   abstract: z.string().optional(),
   keywords: z.string().optional(),
-  isPublished: z.coerce.boolean().optional(),
+  // HTML checkboxes only send the field when checked, so coerce "true" → true
+  // and missing → false. Optional would silently skip unchecks.
+  isPublished: z
+    .string()
+    .optional()
+    .transform((v) => v === "true"),
   // showInNavigation: z.coerce.boolean().optional(),
 });
 
-//    type: z.enum(["hero", "steps", "signup-form", "faq", "markdown"]),
+export const blockTypes = [
+  "hero",
+  "steps",
+  "signup-form",
+  "faq",
+  "markdown",
+] as const;
+
+export const addBlockInput = z.object({
+  pageId: z.string().uuid(),
+  type: z.enum(blockTypes),
+});
+
+export const updateBlockInput = z.object({
+  id: z.string().uuid(),
+  content: z.string().optional(),
+  // See isPublished above — same checkbox pattern.
+  isVisible: z
+    .string()
+    .optional()
+    .transform((v) => v === "true"),
+});
+
+export const deleteBlockInput = z.object({
+  id: z.string().uuid(),
+});
+
+export const reorderBlocksInput = z.object({
+  pageId: z.string().uuid(),
+  blockIds: z.array(z.string().uuid()),
+});
 
 export type PageCreateInput = z.infer<typeof createPageInput>;
 export type PageUpdateInput = z.infer<typeof updatePageInput>;
+export type AddBlockInput = z.infer<typeof addBlockInput>;
+export type UpdateBlockInput = z.infer<typeof updateBlockInput>;
+export type DeleteBlockInput = z.infer<typeof deleteBlockInput>;
+export type ReorderBlocksInput = z.infer<typeof reorderBlocksInput>;

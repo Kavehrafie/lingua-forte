@@ -1,35 +1,36 @@
 ---
-import { cn } from "@/lib/utils"
-import Brand from "@/components/brand.astro"
-import { Icon } from "@/components/ui/icon"
-import { Logo, LogoText } from "@/components/ui/logo"
-import { Section, SectionContainer } from "@/components/ui/section"
-import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils";
+import Brand from "@/components/brand.astro";
+import { Icon } from "@/components/ui/icon";
+import { Logo, LogoText } from "@/components/ui/logo";
+import { Section, SectionContainer } from "@/components/ui/section";
+import { Separator } from "@/components/ui/separator";
+import LogoMask from "../LogoMask.astro";
 
 type Props = {
-  class?: string
-  brandName: string
-  brandHref: string
-  description: string
+  class?: string;
+  brandName: string;
+  brandHref: string;
+  description: string;
   socials?: {
-    label: string
-    href: string
-    icon: string
-  }[]
+    label: string;
+    href: string;
+    icon: string;
+  }[];
   columns: {
-    title: string
+    title: string;
     links: {
-      label: string
-      href: string
-      icon?: string
-    }[]
-  }[]
-  copyright: string
+      label: string;
+      href: string;
+      icon?: string;
+    }[];
+  }[];
+  copyright: string;
   bottomLinks?: {
-    label: string
-    href: string
-  }[]
-}
+    label: string;
+    href: string;
+  }[];
+};
 
 const {
   class: className,
@@ -40,19 +41,16 @@ const {
   columns,
   copyright,
   bottomLinks,
-} = Astro.props
+} = Astro.props;
 ---
 
-<footer class={cn("", className)}>
-  <Section class="py-16 lg:py-20">
-    <SectionContainer>
+<footer class="overflow-hidden parallax-footer">
+  <Section class="py-16 lg:py-20 parallax">
+    <!-- <Calder class="parallax-layer-back" /> -->
+    <SectionContainer class="parallax-layer-front">
       <div class="grid gap-10 lg:grid-cols-[1fr_2fr]">
         <div class="flex flex-col gap-5">
-          <Logo href={brandHref}>
-            <LogoText>
-              <Brand />
-            </LogoText>
-          </Logo>
+          <LogoMask />
           <p class="text-muted-foreground max-w-xs text-sm leading-relaxed">
             {description}
           </p>
@@ -122,3 +120,50 @@ const {
     </SectionContainer>
   </Section>
 </footer>
+
+<!-- <style is:global>
+  @property --parallax-y {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 0%;
+  }
+
+  .parallax-footer {
+    animation: footer-parallax linear both;
+    animation-timeline: view();
+    animation-range: entry;
+  }
+
+  @keyframes footer-parallax {
+    from {
+      --parallax-y: -20%;
+    }
+    to {
+      --parallax-y: 20%;
+    }
+  }
+
+  footer .parallax {
+    position: relative;
+    overflow: hidden;
+  }
+  footer .parallax-layer-back {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    width: 50% !important;
+    height: 100% !important;
+    object-fit: cover;
+    object-position: right center;
+    margin-inline: 3em;
+    pointer-events: none;
+    z-index: 0;
+    transform: translateY(var(--parallax-y));
+  }
+  footer .parallax-layer-front {
+    position: relative;
+    z-index: 1;
+  }
+</style> -->

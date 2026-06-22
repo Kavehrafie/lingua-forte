@@ -1,5 +1,7 @@
 import { env } from "cloudflare:workers";
+import { eq, asc, sql } from "drizzle-orm";
 import { getDb } from "./db";
+import { pageBlock } from "./db/schema";
 
 export const getPageByID = async (id: string) => {
   const db = getDb(env.db);
@@ -7,8 +9,33 @@ export const getPageByID = async (id: string) => {
     where: (page, { eq }) => eq(page.id, id),
     with: {
       blocks: {
-        orderBy: (pageBlock, { desc }) => desc(pageBlock.position),
+        orderBy: (pageBlock, { asc }) => asc(pageBlock.position),
       },
     },
   });
+};
+
+export const getBlockById = async (id: string) => {
+  const db = getDb(env.db);
+  return db.query.pageBlock.findFirst({
+    where: eq(pageBlock.id, id),
+  });
+};
+
+export const getPageBlocks = async (pageId: string) => {
+  const db = getDb(env.db);
+  return db.query.pageBlock.findMany({
+    where: eq(pageBlock.pageId, pageId),
+    orderBy: asc(pageBlock.position),
+  });
+};
+
+export const nextBlockPosition = async (pageId: string) => {
+  const db = getDb(env.db);
+  const result = await db
+    .select({ max: sql<number>`max(${pageBlock.position})` })
+    .from(pageBlock)
+    .where(eq(pageBlock.pageId, pageId));
+  const max = result[0]?.max ?? -1;
+  return max + 1;
 };

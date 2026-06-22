@@ -33,7 +33,7 @@ const {
 // does the emphasis; no decorative markup needed.
 ---
 
-<Section class={cn("", className)}>
+<Section class={cn("parallax-hero", className)}>
   <SectionContainer>
     <div
       class="grid items-start gap-12 lg:grid-cols-5 lg:gap-16"
@@ -41,7 +41,7 @@ const {
     >
       <!-- Image column -->
       <div class="lg:col-span-2">
-        <Calder class="w-full" />
+        <Calder class="w-full parallax-hero-layer" />
         <!-- <Image
           src={image.src}
           alt={image.alt}
@@ -94,3 +94,30 @@ const {
     </div>
   </SectionContainer>
 </Section>
+
+<style>
+  @property --parallax-y {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 0%;
+  }
+
+  .parallax-hero {
+    animation: hero-parallax linear both;
+    animation-timeline: view();
+    animation-range: exit;
+  }
+
+  @keyframes hero-parallax {
+    from {
+      --parallax-y: 0%;
+    }
+    to {
+      --parallax-y: 40%;
+    }
+  }
+
+  .parallax-hero-layer {
+    transform: translateY(var(--parallax-y));
+  }
+</style>

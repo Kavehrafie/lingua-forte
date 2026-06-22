@@ -1,25 +1,21 @@
 import { defineAction, ActionError } from "astro:actions";
 import { createAuth } from "@/lib/server/auth";
 import { env } from "cloudflare:workers";
-import { createPageInput, updatePageInput } from "./schema";
-import { z } from "astro/zod";
+import { eq, sql } from "drizzle-orm";
+import {
+  createPageInput,
+  updatePageInput,
+  addBlockInput,
+  updateBlockInput,
+  deleteBlockInput,
+  reorderBlocksInput,
+} from "./schema";
 import { getDb } from "@/lib/server/db";
-import { page } from "@/lib/server/db/schema";
+import { page, pageBlock } from "@/lib/server/db/schema";
+import { getBlockById, nextBlockPosition } from "@/lib/server/page";
+import { heroBlockFields } from "@/lib/block-fields";
 
 export const server = {
-  updatePage: defineAction({
-    input: updatePageInput,
-    accept: "form",
-    handler: async (formData, ctx) => {
-      if (ctx.locals.user == null) {
-        throw new ActionError({
-          code: "UNAUTHORIZED",
-          message: "You must be logged in to update a page.",
-        });
-      }
-    },
-  }),
-
   createPage: defineAction({
     input: createPageInput,
     accept: "form",
@@ -33,8 +29,6 @@ export const server = {
 
       const db = getDb(env.db);
 
-      // `type` is validated by the schema but not a column on the `page` table;
-      // it'll be used later when the page gets an initial block.
       const { title, path, abstract, keywords } = formData;
 
       return Promise.try(() =>
@@ -54,6 +48,199 @@ export const server = {
           }
           throw err;
         });
+    },
+  }),
+
+  updatePage: defineAction({
+    input: updatePageInput,
+    accept: "form",
+    handler: async (formData, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to edit a page.",
+        });
+      }
+
+      const db = getDb(env.db);
+      const { id, title, path, abstract, keywords, isPublished } = formData;
+      // isPublished is now always a real boolean (transform in schema).
+
+      return Promise.try(() =>
+        db
+          .update(page)
+          .set({ title, path, abstract, keywords, isPublished })
+          .where(eq(page.id, id))
+          .returning({ id: page.id }),
+      )
+        .then(([updated]) => {
+          if (!updated) {
+            throw new ActionError({
+              code: "NOT_FOUND",
+              message: "Page not found.",
+            });
+          }
+          return { id: updated.id };
+        })
+        .catch((err: unknown) => {
+          if (err instanceof ActionError) throw err;
+          const message = err instanceof Error ? err.message : String(err);
+          if (message.includes("UNIQUE constraint failed")) {
+            throw new ActionError({
+              code: "CONFLICT",
+              message: "A page with this path already exists.",
+            });
+          }
+          throw err;
+        });
+    },
+  }),
+
+  addBlock: defineAction({
+    input: addBlockInput,
+    accept: "form",
+    handler: async (formData, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to add a block.",
+        });
+      }
+
+      const db = getDb(env.db);
+      const { pageId, type } = formData;
+      const position = await nextBlockPosition(pageId);
+
+      return Promise.try(() =>
+        db
+          .insert(pageBlock)
+          .values({ pageId, type, position, content: {} })
+          .returning({ id: pageBlock.id, pageId: pageBlock.pageId }),
+      ).then(([created]) => ({
+        id: created.id,
+        pageId: created.pageId,
+      }));
+    },
+  }),
+
+  updateBlock: defineAction({
+    input: updateBlockInput,
+    accept: "form",
+    handler: async (formData, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to edit a block.",
+        });
+      }
+
+      const db = getDb(env.db);
+      const { id, content, isVisible } = formData;
+
+      const existing = await getBlockById(id);
+      if (!existing) {
+        throw new ActionError({
+          code: "NOT_FOUND",
+          message: "Block not found.",
+        });
+      }
+
+      // Editors send content as a string. Shape it into the right object form
+      // based on the block's type: markdown wraps the raw text, everything else
+      // expects a JSON string the editor serialized. Empty content clears the
+      // field instead of throwing on JSON.parse("").
+      let contentObj: unknown = undefined;
+      if (content !== undefined) {
+        if (content === "") {
+          contentObj = null;
+        } else if (existing.type === "markdown") {
+          contentObj = { markdown: content };
+        } else {
+          try {
+            if (existing.type === "hero") {
+              contentObj = heroBlockFields.parse(JSON.parse(content));
+            }
+          } catch {
+            throw new ActionError({
+              code: "BAD_REQUEST",
+              message: "Block content was not valid JSON.",
+            });
+          }
+        }
+      }
+
+      return Promise.try(() =>
+        db
+          .update(pageBlock)
+          .set({
+            ...(contentObj !== undefined && { content: contentObj }),
+            isVisible, // always defined now (transform in schema)
+          })
+          .where(eq(pageBlock.id, id))
+          .returning({ id: pageBlock.id, pageId: pageBlock.pageId }),
+      ).then(([updated]) => ({
+        id: updated.id,
+        pageId: updated.pageId,
+      }));
+    },
+  }),
+
+  deleteBlock: defineAction({
+    input: deleteBlockInput,
+    accept: "form",
+    handler: async (formData, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to delete a block.",
+        });
+      }
+
+      const db = getDb(env.db);
+      const { id } = formData;
+
+      const existing = await getBlockById(id);
+      if (!existing) {
+        throw new ActionError({
+          code: "NOT_FOUND",
+          message: "Block not found.",
+        });
+      }
+
+      return Promise.try(() =>
+        db
+          .delete(pageBlock)
+          .where(eq(pageBlock.id, id))
+          .returning({ pageId: pageBlock.pageId }),
+      ).then(([deleted]) => ({ pageId: deleted.pageId }));
+    },
+  }),
+
+  reorderBlocks: defineAction({
+    input: reorderBlocksInput,
+    accept: "json",
+    handler: async (formData, ctx) => {
+      if (ctx.locals.user == null) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message: "You must be logged in to reorder blocks.",
+        });
+      }
+
+      const db = getDb(env.db);
+      const { pageId, blockIds } = formData;
+
+      await Promise.all(
+        blockIds.map((blockId, index) =>
+          db
+            .update(pageBlock)
+            .set({ position: index })
+            .where(
+              sql`${pageBlock.id} = ${blockId} and ${pageBlock.pageId} = ${pageId}`,
+            ),
+        ),
+      );
+      return { success: true };
     },
   }),
 

@@ -1,0 +1,156 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Form } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { actions } from "astro:actions";
+
+type Page = NonNullable<
+  Awaited<ReturnType<typeof import("@/lib/server/page").getPageByID>>
+>;
+
+type Props = HTMLAttributes<"div"> & {
+  // Present for edit, absent for create.
+  page?: Page;
+  fieldErrors?: Record<string, string[]>;
+  pathConflict?: string | null;
+};
+
+const {
+  page,
+  fieldErrors = {},
+  pathConflict = null,
+  ...rest
+} = Astro.props;
+
+const isEdit = Boolean(page);
+const action = isEdit ? actions.updatePage : actions.createPage;
+const submitLabel = isEdit ? "Save page" : "Create page";
+const pathInvalid = Boolean(fieldErrors.path) || Boolean(pathConflict);
+---
+
+<div {...rest}>
+  <Form method="post" action={action}>
+    {isEdit && <input type="hidden" name="id" value={page!.id} />}
+
+    <Card>
+      <CardHeader>
+        <CardTitle>{isEdit ? "Page settings" : "New page"}</CardTitle>
+        <CardDescription>
+          {isEdit
+            ? "Title, path, and metadata for this page."
+            : "Enter the title and path. You can add content blocks after creating it."}
+        </CardDescription>
+        {isEdit && (
+          <CardAction>
+            <a
+              href={`/admin/page/${page!.id}/blocks`}
+              class="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              Manage blocks
+              <Icon name="arrow-right" />
+            </a>
+          </CardAction>
+        )}
+      </CardHeader>
+
+      <CardContent>
+        <FieldGroup>
+          <Field data-invalid={fieldErrors.title ? "true" : undefined}>
+            <FieldLabel for="title">Title</FieldLabel>
+            <Input
+              id="title"
+              name="title"
+              placeholder="Getting Started"
+              value={page?.title ?? ""}
+              aria-invalid={fieldErrors.title ? "true" : undefined}
+            />
+            {fieldErrors.title && (
+              <FieldError>{fieldErrors.title.join(", ")}</FieldError>
+            )}
+          </Field>
+
+          <Field data-invalid={pathInvalid ? "true" : undefined}>
+            <FieldLabel for="path">Path</FieldLabel>
+            <Input
+              id="path"
+              name="path"
+              value={page?.path ?? ""}
+              placeholder="getting-started"
+              aria-invalid={pathInvalid ? "true" : undefined}
+            />
+            <FieldDescription>
+              Lowercase, hyphenated. Leading and trailing slashes are stripped
+              automatically.
+            </FieldDescription>
+            {fieldErrors.path && (
+              <FieldError>{fieldErrors.path.join(", ")}</FieldError>
+            )}
+            {pathConflict && <FieldError>{pathConflict}</FieldError>}
+          </Field>
+
+          <Field>
+            <FieldLabel for="abstract">Abstract</FieldLabel>
+            <Textarea
+              id="abstract"
+              name="abstract"
+              value={page?.abstract ?? ""}
+              placeholder="Short summary shown in listings"
+            />
+            <FieldDescription>Optional. Shown in page listings.</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel for="keywords">Keywords</FieldLabel>
+            <Input
+              id="keywords"
+              name="keywords"
+              value={page?.keywords ?? ""}
+              placeholder="classes, tutoring, english"
+            />
+            <FieldDescription>Comma-separated.</FieldDescription>
+          </Field>
+
+          {isEdit && (
+            <Field>
+              <label class="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  name="isPublished"
+                  value="true"
+                  checked={page!.isPublished}
+                  class="size-4 rounded border-input"
+                />
+                Published
+              </label>
+              <FieldDescription>
+                Unchecked pages are not visible to the public.
+              </FieldDescription>
+            </Field>
+          )}
+        </FieldGroup>
+      </CardContent>
+
+      <CardContent>
+        <Button type="submit" class="w-fit self-end">{submitLabel}</Button>
+      </CardContent>
+    </Card>
+  </Form>
+</div>
