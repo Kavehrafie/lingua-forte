@@ -32,6 +32,7 @@
   "vars": {
     "ADMIN_EMAIL": "linguaforte@protonmail.com",
     "NOREPLY_EMAIL": "noreply@linguaforte.ca",
+    "BETTER_AUTH_URL": "https://linguaforte.ca",
   },
   /**
    * Static Assets
