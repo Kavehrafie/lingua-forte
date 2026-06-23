@@ -10,7 +10,6 @@ export const createAuth = (env: Cloudflare.Env | null) => {
   // reads table definitions from the schema.
   if (!env) {
     return betterAuth({
-      baseURL: env!.BETTER_AUTH_URL,
       database: drizzleAdapter(getDb(null!), { provider: "sqlite" }),
       plugins: [magicLink({ sendMagicLink: async () => {} })],
     });
@@ -19,6 +18,7 @@ export const createAuth = (env: Cloudflare.Env | null) => {
   const resend = new Resend(env.RESEND_API_KEY);
 
   return betterAuth({
+    baseURL: env.BETTER_AUTH_URL,
     plugins: [
       magicLink({
         sendMagicLink: async ({ email, url }) => {
