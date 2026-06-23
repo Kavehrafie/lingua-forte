@@ -23,11 +23,7 @@ import { page, pageBlock } from "@/lib/server/db/schema";
 import { getBlockById, nextBlockPosition } from "@/lib/server/page";
 import { heroBlockFields, stepsBlockFields } from "@/lib/block-fields";
 import { findCourseById } from "@/lib/courses";
-import {
-  readDraft,
-  writeDraft,
-  clearDraft,
-} from "@/lib/server/signup-draft";
+import { readDraft, writeDraft, clearDraft } from "@/lib/server/signup-draft";
 import {
   completeSignup,
   addInterviewSlot,
@@ -309,7 +305,7 @@ export const server = {
 
       await auth.api.signInMagicLink({
         body: {
-          email: "noreply@linguaforte.com",
+          email: `${env.ADMIN_EMAIL}`,
           callbackURL: "/admin",
           newUserCallbackURL: "/admin/welcome",
           errorCallbackURL: "/error",

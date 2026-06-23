@@ -11,6 +11,7 @@ declare namespace Cloudflare {
 	interface Env {
 		ADMIN_EMAIL: string;
 		NOREPLY_EMAIL: string;
+		RESEND_API_KEY: string;
 	}
 }
 

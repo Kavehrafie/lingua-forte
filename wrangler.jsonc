@@ -30,7 +30,7 @@
    */
   // "vars": {  "MY_VARIABLE": "production_value" }
   "vars": {
-    "ADMIN_EMAIL": "admin@linguaforte.ca",
+    "ADMIN_EMAIL": "linguaforte@protonmail.com",
     "NOREPLY_EMAIL": "noreply@linguaforte.ca",
   },
   /**
@@ -47,11 +47,6 @@
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
    */
   // "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
-  "send_email": [
-    {
-      "name": "EMAIL",
-    },
-  ],
   "d1_databases": [
     {
       "binding": "db",

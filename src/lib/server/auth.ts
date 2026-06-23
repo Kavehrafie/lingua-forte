@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getDb } from "./db";
 import { magicLink } from "better-auth/plugins";
-import { cloudflareEmail } from "better-auth-cloudflare-email";
+import { Resend } from "resend";
 
 export const createAuth = (env: Cloudflare.Env | null) => {
   // CLI path (env is null): minimal instance for `better-auth` schema generation.
@@ -15,15 +15,21 @@ export const createAuth = (env: Cloudflare.Env | null) => {
     });
   }
 
-  const email = cloudflareEmail.workers({
-    binding: env.EMAIL as any,
-    from: `Lingua Forte <${env.NOREPLY_EMAIL}>`,
-    appName: "Lingua Forte",
-  });
+  const resend = new Resend(env.RESEND_API_KEY);
 
   return betterAuth({
-    ...email.config,
-    plugins: [magicLink({ sendMagicLink: email.sendMagicLink })],
+    plugins: [
+      magicLink({
+        sendMagicLink: async ({ email, url }) => {
+          await resend.emails.send({
+            from: `Lingua Forte <${env.NOREPLY_EMAIL}>`,
+            to: email,
+            subject: "Sign in to Lingua Forte",
+            html: `<p>Click the link below to sign in to your Lingua Forte account. If you didn't request this, you can safely ignore this email.</p><p><a href="${url}">${url}</a></p>`,
+          });
+        },
+      }),
+    ],
     database: drizzleAdapter(getDb(env.db), { provider: "sqlite" }),
   });
 };
