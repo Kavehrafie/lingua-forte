@@ -38,7 +38,7 @@
    * Static Assets
    * https://developers.cloudflare.com/workers/static-assets/binding/
    */
-  "main": "./dist/server/entry.mjs",
+  "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     "directory": "./dist/client",
     "binding": "ASSETS",
